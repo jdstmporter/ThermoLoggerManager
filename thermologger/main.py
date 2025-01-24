@@ -3,8 +3,8 @@
 import sched
 import time
 
-from api import ScanForUpdates
-from things import ThingSpeak
+from thermologger.api import ScanForUpdates
+from thermologger.things import ThingSpeak
 
 class RunLoop:
 
