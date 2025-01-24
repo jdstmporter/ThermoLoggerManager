@@ -16,26 +16,28 @@ channel_ID = "2818594"
 class ThingSpeak:
 
 
-    def __init__(self):
-        self.url = f'https://api.thingspeak.com/channels/{channel_ID}/bulk_update.json'
-        self.headers = {
-            'Connection': 'keep-alive',
-            'Accept': '*/*',
-            'Content-Type': 'application/json',
-            'THINGSPEAKAPIKEY': WRITE_KEY
-        }
+    def __init__(self,params):
+        self.params=params
+        self.url = f'https://api.thingspeak.com/channels/{params.channel_ID}/bulk_update.json'
+
 
 
     def __call__(self,records=[]):
         try:
             record = dict(
-                write_api_key = WRITE_KEY,
+                write_api_key = self.params.WRITE_KEY,
                 updates = records
             )
             j = json.dumps(record)
-            self.headers['Content-Length']=str(len(j))
+            headers = {
+                'Connection': 'keep-alive',
+                'Accept': '*/*',
+                'Content-Type': 'application/json',
+                'Content-Length': str(len(j)),
+                'THINGSPEAKAPIKEY': self.params.WRITE_KEY,
+            }
             print(f'Logging {j} to {self.url}')
-            response = requests.post(self.url, headers=self.headers,data=j)
+            response = requests.post(self.url, headers=headers,data=j)
             if response.status_code not in [200,201,202]:
                 raise ThingSpeakException(f'HTTP {response.status_code} {response.reason}')
             return response.json()

@@ -2,20 +2,56 @@
 
 import sched
 import time
+import json
 
 from thermologger.api import ScanForUpdates
 from thermologger.things import ThingSpeak
 
+
+class Params:
+
+    def __init__(self,**kwargs):
+        self.dict = dict(
+            scan_time=60,
+            wait_time=300,
+            channel_ID = '2818594',
+            url='https://api.thingspeak.com/channels/{channel_ID}/bulk_update.json',
+            READ_KEY='8V5Q5QO2CO01B0BQ',
+            WRITE_KEY='8V5Q5QO2CO01B0BQ',
+            name='ThermoBeacon',
+            response_length=18
+        )
+        self.dict.update(kwargs)
+
+    def __getitem__(self,key: str):
+        return self.dict[key]
+
+    def __getattr__(self, key: str):
+        return self.dict[key]
+
+    def __str__(self):
+        lines = [ f'{key} = {value}' for key,value in self.dict.items()]
+        return '\n'.join(lines)
+
+
+
+
 class RunLoop:
 
-    def __init__(self,scan_time=20,wait_time=300):
-        self.scan_time=scan_time
-        self.wait_time=wait_time
+    def __init__(self,config='config/config.json'):
+        try:
+            with open(config, mode='r') as conf:
+                j = json.load(conf)
+        except Exception as e:
+            print(f'Error: {e}')
+            j = dict()
+        print('\n'.join([f'{key} = {value}' for key, value in j.items()]))
+        self.params = Params(**j)
         self.scheduler = sched.scheduler(time.time, time.sleep)
 
 
     def action(self):
-        scanner = ScanForUpdates(timeout=self.scan_time)
+        scanner = ScanForUpdates(self.params)
         beacons = scanner.run()
 
         print(f'Got {len(beacons)} records')
@@ -26,7 +62,7 @@ class RunLoop:
         if len(beacons) > 0:
             print('Contacting ThingSpeak')
             try:
-                things = ThingSpeak()
+                things = ThingSpeak(self.params)
                 things([b.dict() for b in beacons])
                 print('Uploaded')
             except Exception as e:
@@ -34,7 +70,7 @@ class RunLoop:
 
     def runner(self):
         self.action()
-        self.scheduler.enter(self.wait_time, 1, self.runner, ())
+        self.scheduler.enter(self.params.wait_time, 1, self.runner, ())
 
     def run(self):
         self.runner()

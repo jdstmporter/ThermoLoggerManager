@@ -11,6 +11,7 @@ setup_args = dict(
     name='ThermoLogger',
     version='1.0',
     packages=find_packages(include=[root, f'{root}.*']),
+    include_package_data=True,
     install_requires=get_install_requires(root),
     url='https://https://github.com/jdstmporter/ThermoLoggerManager',
     license='BSD3',

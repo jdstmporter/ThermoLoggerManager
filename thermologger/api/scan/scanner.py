@@ -4,10 +4,10 @@ import asyncio
 from ..data import AdvertisingResponse, ThermoBeaconValues
 
 class ScanForUpdates:
-    def __init__(self, name : str = 'ThermoBeacon', response_length : int = 18, timeout : int = 540):
-        self.timeout = timeout
-        self.response_length = response_length
-        self.name = name
+    def __init__(self, params):
+        self.timeout = params.scan_time
+        self.response_length = params.response_length
+        self.name = params.name
         self.macs = []
         self.beacons = []
 
@@ -20,7 +20,7 @@ class ScanForUpdates:
     def action(self, response):
         received = []
         for k, v in response:
-            if len(v) == 18:
+            if len(v) == self.response_length:
                 received.append(ThermoBeaconValues(k, v))
         if len(received)>0:
             rcv = received[0]
