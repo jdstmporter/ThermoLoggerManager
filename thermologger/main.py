@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-
+import os.path
 import sched
 import time
 import json
+import __main__
 
 from thermologger.api import ScanForUpdates
 from thermologger.things import ThingSpeak
@@ -33,20 +34,29 @@ class Params:
         lines = [ f'{key} = {value}' for key,value in self.dict.items()]
         return '\n'.join(lines)
 
-
-
-
-class RunLoop:
-
-    def __init__(self,config='config/config.json'):
+    @classmethod
+    def load(cls,config):
         try:
+            if hasattr(__main__,'__file__'):
+                main_file = __main__.__file__
+                prefix = os.path.dirname(main_file)
+                config = os.path.join(prefix,config)
+            #print(f'Config is now {config}')
             with open(config, mode='r') as conf:
                 j = json.load(conf)
         except Exception as e:
             print(f'Error: {e}')
             j = dict()
         print('\n'.join([f'{key} = {value}' for key, value in j.items()]))
-        self.params = Params(**j)
+        return Params(**j)
+
+
+
+
+class RunLoop:
+
+    def __init__(self,config='config/config.json'):
+        self.params = Params.load(config)
         self.scheduler = sched.scheduler(time.time, time.sleep)
 
 
@@ -74,7 +84,11 @@ class RunLoop:
 
     def run(self):
         self.runner()
-        self.scheduler.run()
+        try:
+            self.scheduler.run()
+        except KeyboardInterrupt:
+            print('Exiting')
+
 
 
 
