@@ -40,8 +40,8 @@ class ThermoBeaconValues:
                           f'Battery = {self.battery}',
                           f'Uptime = {self.uptime}'])
 
-    def dict(self):
-        now = datetime.datetime.now()
+    def dict(self,offset=0):
+        now = datetime.datetime.now() + datetime.timedelta(seconds=offset)
         return dict(
             created_at = now.strftime('%Y-%m-%d %H:%M:%S %z'),
             field1 = "ThermoBeacon",

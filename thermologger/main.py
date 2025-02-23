@@ -73,7 +73,7 @@ class RunLoop:
             print('Contacting ThingSpeak')
             try:
                 things = ThingSpeak(self.params)
-                things([b.dict() for b in beacons])
+                things([b.dict(offset) for offset, b in enumerate(beacons)])
                 print('Uploaded')
             except Exception as e:
                 print(f'Error: {str(e)}')

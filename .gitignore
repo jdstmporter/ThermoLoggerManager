@@ -2,3 +2,7 @@
 __pycache__/
 *.py[ocd]
 *$py.class
+
+dist/
+
+ThermoLogger.egg-info/
