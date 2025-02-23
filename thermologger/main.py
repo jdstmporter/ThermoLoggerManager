@@ -8,6 +8,11 @@ import __main__
 from thermologger.api import ScanForUpdates
 from thermologger.things import ThingSpeak
 
+'''
+    To read use
+
+    https://api.thingspeak.com/channels/<CHANNEL_ID>/feeds.json?api_key=<READ_KEY>&ndays=<N>
+'''
 
 class Params:
 
