@@ -13,15 +13,19 @@ class ThingSpeakRecord:
 
 
     def __init__(self,item):
+        self.sequence = int(item['entry_id'])
         self.mac = item['field2']
         self.temperature = float(item['field3'])
         self.humidity = float(item['field4'])
         self.battery = float(item['field5'])
-        self.timestamp = datetime.datetime.fromtimestamp(float(item['field7']))
+        self.ts = float(item['field7'])
+        self.timestamp = datetime.datetime.fromtimestamp(self.ts)
 
     def __str__(self):
         return f'@ {self.timestamp}: T {self.temperature}C H {self.humidity}% B {self.battery}%'
 
+    def sql(self):
+        f"({self.sequence}, {self.ts}, {self.temperature}, {self.humidity}, {self.battery}, '{self.mac}')"
 
 
 class ThingSpeakDownloader:
@@ -34,9 +38,9 @@ class ThingSpeakDownloader:
         "260b0000f29d": 'TEST'
     }
 
-    def __init__(self,params):
+    def __init__(self,params,payload):
         self.params=params
-        self.payload= { 'api_key' : params.READ_KEY, 'ndays' : params.ndays }
+        self.payload=payload
         self.url = f'https://api.thingspeak.com/channels/{params.channel_ID}/feeds.json'
 
     def decode(self,data):
