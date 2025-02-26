@@ -8,24 +8,34 @@ WRITE_KEY = '8V5Q5QO2CO01B0BQ'
 READ_KEY = '8V5Q5QO2CO01B0BQ'
 channel_ID = "2818594"
 
-class ThingSpeakRecord:
-
-
-
-    def __init__(self,item):
-        self.sequence = int(item['entry_id'])
-        self.mac = item['field2']
-        self.temperature = float(item['field3'])
-        self.humidity = float(item['field4'])
-        self.battery = float(item['field5'])
-        self.ts = float(item['field7'])
+class Record:
+    def __init__(self,mac,temperature,humidity,battery,timestamp):
+        self.mac=mac
+        self.temperature=temperature
+        self.humidity=humidity
+        self.battery=battery
+        self.ts=timestamp
         self.timestamp = datetime.datetime.fromtimestamp(self.ts)
 
     def __str__(self):
         return f'@ {self.timestamp}: T {self.temperature}C H {self.humidity}% B {self.battery}%'
 
     def sql(self):
-        f"({self.sequence}, {self.ts}, {self.temperature}, {self.humidity}, {self.battery}, '{self.mac}')"
+        return f"({self.ts}, {self.temperature}, {self.humidity}, {self.battery}, '{self.mac}')"
+
+
+
+class ThingSpeakRecord(Record):
+    def __init__(self,item):
+        super().__init__(
+                         item['field2'],
+                         float(item['field3']),
+                         float(item['field4']),
+                         float(item['field5']),
+                         float(item['field7']))
+
+
+
 
 
 class ThingSpeakDownloader:

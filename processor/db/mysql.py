@@ -1,6 +1,6 @@
 import mysql.connector
 
-from processor.thingspeak import ThingSpeakRecord
+from processor.thingspeak import Record
 
 
 
@@ -12,21 +12,13 @@ class SQLStore:
     def close(self):
         self.db.close()
 
-    def read(self) -> [ThingSpeakRecord]:
+    def read(self) -> [Record]:
         cursor = self.db.cursor()
-        query = 'select seq, timestamp, temperature, humidity, battery, sensor FROM records ORDER BY seq'
+        query = 'select timestamp, temperature, humidity, battery, sensor FROM records ORDER BY seq'
         cursor.execute(query)
         out = []
-        for (seq, timestamp, temperature, humidity, battery, sensor) in cursor:
-            item = dict(
-                entry_id=seq,
-                field2=sensor,
-                field3=temperature,
-                field4=humidity,
-                field5=battery,
-                field7=timestamp
-            )
-            out.append(ThingSpeakRecord(item))
+        for (timestamp, temperature, humidity, battery, sensor) in cursor:
+            out.append(Record(timestamp, temperature, humidity, battery, sensor))
         cursor.close()
         return out
 
@@ -37,11 +29,16 @@ class SQLStore:
         cursor.close()
         return seqs
 
+    def next_pk(self):
+        cursor = self.db.cursor()
+        cursor.execute('select max(seq) FROM records')
+        record = cursor.fetchone()
+        return record[0]+1
 
-    def write(self,records : [ThingSpeakRecord]):
-        existing = self._get_pks()
-        vals = ', '.join([r.sql() for r in records if r.sequence not in existing])
-        sql = f"INSERT INTO records (seq, timestamp, temperature, humidity, battery, sensor) values {vals}"
+
+    def write(self,records : [Record]):
+        vals = ', '.join([r.sql() for r in records])
+        sql = f"INSERT INTO records (timestamp, temperature, humidity, battery, sensor) values {vals}"
         print(sql)
         cursor = self.db.cursor()
         cursor.execute(sql)
