@@ -1,13 +1,15 @@
 import mysql.connector
 
-from processor.thingspeak import Record
+from thermologger.common.records import Record
 
 
 
 class SQLStore:
 
     def __init__(self,params):
-        self.db = mysql.connector.connect(database=params.db_database,host=params.db_host,user=params.db_user,password=params.db_password)
+        self.db = mysql.connector.connect(database=params.db_database,host=params.db_host,
+                                          user=params.db_user,password=params.db_password,
+                                          port=params.db_port)
 
     def close(self):
         self.db.close()
@@ -18,7 +20,7 @@ class SQLStore:
         cursor.execute(query)
         out = []
         for (timestamp, temperature, humidity, battery, sensor) in cursor:
-            out.append(Record(timestamp, temperature, humidity, battery, sensor))
+            out.append(Record(sensor, temperature, humidity, battery, timestamp))
         cursor.close()
         return out
 
@@ -44,5 +46,7 @@ class SQLStore:
         cursor.execute(sql)
         self.db.commit()
         cursor.close()
+
+
 
 

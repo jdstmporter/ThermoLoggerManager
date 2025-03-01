@@ -17,7 +17,8 @@ class Params:
             db_database='AllSaints',
             db_host='localhost',
             db_user='sql',
-            db_password='sql'
+            db_password='sql',
+            db_port=3306
         )
         self.dict.update(kwargs)
 

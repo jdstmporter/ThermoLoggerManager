@@ -1,6 +1,6 @@
 
-from common import Params
-from processor.thingspeak import ThingSpeakDownloader
+from thermologger.common import Params
+from thermologger.processor.thingspeak import ThingSpeakDownloader
 
 
 def run(args):

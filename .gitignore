@@ -6,3 +6,7 @@ __pycache__/
 dist/
 
 ThermoLogger.egg-info/
+/identifier.sqlite
+/thermologger/db/records.db
+/thermologger/common/syslog.log
+/syslog.log

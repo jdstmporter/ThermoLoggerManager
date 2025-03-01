@@ -5,8 +5,8 @@ import time
 
 
 from thermologger.api import ScanForUpdates
-from thermologger.things import ThingSpeak
-from common import Params
+from thermologger.db import SQLStore
+from thermologger.common import Params
 
 '''
     To read use
@@ -34,10 +34,10 @@ class RunLoop:
 
         # now do the thingspeak bit
         if len(beacons) > 0:
-            print('Contacting ThingSpeak')
+            print('Contacting SQL')
             try:
-                things = ThingSpeak(self.params)
-                things([b.dict(offset) for offset, b in enumerate(beacons)])
+                things = SQLStore(self.params)
+                things.write([b.record() for b in beacons])
                 print('Uploaded')
             except Exception as e:
                 print(f'Error: {str(e)}')

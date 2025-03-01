@@ -1,4 +1,5 @@
 import datetime
+from thermologger.common import Record
 
 
 def decode_temperature(b:bytes) -> float:
@@ -40,15 +41,7 @@ class ThermoBeaconValues:
                           f'Battery = {self.battery}',
                           f'Uptime = {self.uptime}'])
 
-    def dict(self,offset=0):
-        now = datetime.datetime.now() + datetime.timedelta(seconds=offset)
-        return dict(
-            created_at = now.strftime('%Y-%m-%d %H:%M:%S %z'),
-            field1 = "ThermoBeacon",
-            field2 = str(self.mac),
-            field3 = str(self.temperature),
-            field4 = str(self.humidity),
-            field5 = str(self.battery),
-            field6 = str(self.uptime),
-            field7 = str(now.timestamp())
-        )
+
+    def record(self):
+        now = datetime.datetime.now().timestamp()
+        return Record(self.mac,self.temperature,self.humidity,self.battery,now)

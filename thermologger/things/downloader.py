@@ -1,27 +1,12 @@
-import datetime
-import json
-from collections import defaultdict
 
+from collections import defaultdict
 import requests
+
+from thermologger.common import Record
 
 WRITE_KEY = '8V5Q5QO2CO01B0BQ'
 READ_KEY = '8V5Q5QO2CO01B0BQ'
 channel_ID = "2818594"
-
-class Record:
-    def __init__(self,mac,temperature,humidity,battery,timestamp):
-        self.mac=mac
-        self.temperature=temperature
-        self.humidity=humidity
-        self.battery=battery
-        self.ts=timestamp
-        self.timestamp = datetime.datetime.fromtimestamp(self.ts)
-
-    def __str__(self):
-        return f'@ {self.timestamp}: T {self.temperature}C H {self.humidity}% B {self.battery}%'
-
-    def sql(self):
-        return f"({self.ts}, {self.temperature}, {self.humidity}, {self.battery}, '{self.mac}')"
 
 
 
@@ -39,14 +24,7 @@ class ThingSpeakRecord(Record):
 
 
 class ThingSpeakDownloader:
-    MACS = {
-        "c21200008b9d": 'Choir',
-        "dc060000f29d": 'Kitchen',
-        "fc0200008b9d": 'Organ',
-        "690600008b9d": 'Pulpit',
-        "ab0100008b9d": 'Lady Chapel',
-        "260b0000f29d": 'TEST'
-    }
+
 
     def __init__(self,params,payload):
         self.params=params
@@ -60,10 +38,7 @@ class ThingSpeakDownloader:
             for record in records:
                 try:
                     item = ThingSpeakRecord(record)
-                    if item.mac not in self.MACS:
-                        raise RuntimeError(f'No location for MAC {item.mac}')
-                    location = self.MACS[item.mac]
-                    items[location].append(item)
+                    items[item.mac].append(item)
                 except Exception as e:
                     print(f'Error decoding record: {e}')
             return items
