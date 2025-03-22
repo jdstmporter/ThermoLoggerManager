@@ -1,2 +1,2 @@
 include thermologger/config/*.json
-include thermologger/db/*.sql
+include thermologger/db_tools/*.sql

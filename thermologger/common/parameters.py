@@ -1,11 +1,12 @@
 import json
 import __main__
 import os.path
+from .loadable import Loadable
 
-class Params:
+class Params(Loadable):
 
     def __init__(self,**kwargs):
-        self.dict = dict(
+        d = dict(
             scan_time=60,
             wait_time=300,
             channel_ID = '2818594',
@@ -18,9 +19,12 @@ class Params:
             db_host='localhost',
             db_user='sql',
             db_password='sql',
-            db_port=3306
+            db_port=3306,
+            web_ip='0.0.0.0',
+            web_port=8080
         )
-        self.dict.update(kwargs)
+        d.update(kwargs)
+        super().__init__(**d)
 
     def __getitem__(self,key: str):
         return self.dict[key]
@@ -32,6 +36,7 @@ class Params:
         lines = [ f'{key} = {value}' for key,value in self.dict.items()]
         return '\n'.join(lines)
 
+'''
     @classmethod
     def load(cls,config):
         try:
@@ -47,4 +52,5 @@ class Params:
             j = dict()
         print('\n'.join([f'{key} = {value}' for key, value in j.items()]))
         return Params(**j)
+'''
 

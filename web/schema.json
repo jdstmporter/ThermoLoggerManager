@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Sensor Record",
+  "description": "A single sensor record",
+  "type": "object",
+  "properties": {
+    "sensor": {
+      "type": "string",
+      "description": "Sensor Name"
+    },
+    "timestamp": {
+      "type": "integer",
+      "description": "Seconds since epoch"
+    },
+    "temperature": {
+      "type": "number",
+      "description": "degrees centigrade"
+    },
+    "humidity": {
+      "type": "number",
+      "description": "percentage"
+    },
+    "battery": {
+      "type": "number",
+      "description": "percentage"
+    }
+  },
+  "required": [
+    "sensor",
+    "timestamp",
+    "temperature",
+    "humidity",
+    "battery"
+  ]
+}

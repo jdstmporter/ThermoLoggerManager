@@ -1,4 +1,12 @@
 {
   "scan_time" : 20,
-  "wait_time" : 60
+  "wait_time" : 60,
+  "sensors" : {
+    "c21200008b9d": "Choir",
+    "dc060000f29d": "Kitchen",
+    "fc0200008b9d": "Organ",
+    "690600008b9d": "Pulpit",
+    "ab0100008b9d": "Lady Chapel",
+    "260b0000f29d": "TEST"
+  }
 }

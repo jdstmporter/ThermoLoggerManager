@@ -1,6 +1,7 @@
 import mysql.connector
 
 from thermologger.common.records import Record
+from thermologger.common.beacons import Beacons
 
 
 
@@ -16,11 +17,22 @@ class SQLStore:
 
     def read(self) -> [Record]:
         cursor = self.db.cursor()
-        query = 'select timestamp, temperature, humidity, battery, sensor FROM records ORDER BY seq'
+        query = 'SELECT mac, sensor, timestamp, temperature, humidity, battery FROM records ORDER BY seq'
         cursor.execute(query)
         out = []
-        for (timestamp, temperature, humidity, battery, sensor) in cursor:
-            out.append(Record(sensor, temperature, humidity, battery, timestamp))
+        for (mac, sensor, timestamp, temperature, humidity, battery) in cursor:
+            out.append(Record(mac, sensor, temperature, humidity, battery, timestamp))
+        cursor.close()
+        return out
+
+    def beacons(self) -> dict:
+        cursor = self.db.cursor()
+        try:
+            query = 'SELECT mac, name from sensors'
+            cursor.execute(query)
+            out = {mac: name for (mac, name) in cursor}
+        except:
+            out = {}
         cursor.close()
         return out
 
@@ -39,8 +51,9 @@ class SQLStore:
 
 
     def write(self,records : [Record]):
-        vals = ', '.join([r.sql() for r in records])
-        sql = f"INSERT INTO records (timestamp, temperature, humidity, battery, sensor) values {vals}"
+        beacons = self.beacons()
+        vals = ', '.join([r.sql(beacons) for r in records])
+        sql = f"INSERT INTO records (mac, sensor, timestamp, temperature, humidity, battery) values {vals}"
         print(sql)
         cursor = self.db.cursor()
         cursor.execute(sql)

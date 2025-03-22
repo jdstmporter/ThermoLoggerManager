@@ -1,3 +1,5 @@
+
+
 MACS = {
     "c21200008b9d": 'Choir',
     "dc060000f29d": 'Kitchen',
@@ -7,8 +9,16 @@ MACS = {
     "260b0000f29d": 'TEST'
 }
 
-def beacon(mac):
-    if mac in MACS:
-        return MACS[mac]
-    else:
-        return mac
+class Beacons:
+
+    def __init__(self,raw={}):
+        self.beacons=raw
+
+    def __getitem__(self,mac):
+        return self.beacons.get(mac,mac)
+
+
+
+
+
+
