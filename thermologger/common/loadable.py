@@ -1,6 +1,8 @@
 import __main__
 import os.path
 import json
+from .logs import syslog, LogLevel
+
 class Loadable:
 
     @classmethod
@@ -14,7 +16,7 @@ class Loadable:
             with open(config, mode='r') as conf:
                 j = json.load(conf)
         except Exception as e:
-            print(f'Error: {e}')
+            syslog(LogLevel.ERROR,f'Error: {e}')
             j = dict()
         print('\n'.join([f'{key} = {value}' for key, value in j.items()]))
         return cls(**j)

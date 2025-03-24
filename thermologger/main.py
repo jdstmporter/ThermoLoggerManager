@@ -6,7 +6,7 @@ import time
 
 from thermologger.api import ScanForUpdates
 from thermologger.db import SQLStore
-from thermologger.common import Params
+from thermologger.common import Params, syslog, LogLevel
 
 '''
     To read use
@@ -24,23 +24,25 @@ class RunLoop:
         self.scheduler = sched.scheduler(time.time, time.sleep)
 
 
+
     def action(self):
         scanner = ScanForUpdates(self.params)
         beacons = scanner.run()
 
-        print(f'Got {len(beacons)} records')
-        for beacon in beacons:
-            print(str(beacon))
+        if syslog.isDebug:
+            syslog(LogLevel.DEBUG,f'Got {len(beacons)} records')
+            for beacon in beacons:
+                syslog(LogLevel.DEBUG,str(beacon))
 
-        # now do the thingspeak bit
         if len(beacons) > 0:
-            print('Contacting SQL')
+            records = [b.record() for b in beacons]
+            syslog(LogLevel.INFO,'Contacting SQL')
             try:
                 things = SQLStore(self.params)
-                things.write([b.record() for b in beacons])
-                print('Uploaded')
+                things.write(records)
+                syslog(LogLevel.INFO,'Uploaded')
             except Exception as e:
-                print(f'Error: {str(e)}')
+                syslog(LogLevel.ERROR,f'Error: {str(e)}')
 
     def runner(self):
         self.action()
@@ -51,7 +53,7 @@ class RunLoop:
         try:
             self.scheduler.run()
         except KeyboardInterrupt:
-            print('Exiting')
+            syslog(LogLevel.INFO,'Exiting')
 
 
 

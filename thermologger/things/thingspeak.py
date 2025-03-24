@@ -20,13 +20,28 @@ class ThingSpeak:
         self.params=params
         self.url = f'https://api.thingspeak.com/channels/{params.channel_ID}/bulk_update.json'
 
+    def _process_record(self,record,first=False):
+        d = dict(
+            Field1 = record.sensor,
+            Field2 = record.mac,
+            Field3 = record.temperature,
+            Field4 = record.humidity,
+            Field5 = record.battery,
+            Field6 = 0,
+            Field7 = record.timestamp.timestamp()
+        )
+        if first:
+            d['created_at'] = record.timestamp.isoformat(sep=' ',timespec='seconds')
+        else:
+            d['delta_t'] = '1'
+        return d
 
-
-    def __call__(self,records=[]):
+    def write(self,records):
         try:
+            r = [self._process_record(record,first = idx==0) for idx, record in enumerate(records)]
             record = dict(
                 write_api_key = self.params.WRITE_KEY,
-                updates = records
+                updates = r
             )
             j = json.dumps(record)
             headers = {

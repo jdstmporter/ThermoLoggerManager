@@ -53,6 +53,10 @@ class Log:
         self(LogLevel.ERROR, str(e))
         self(LogLevel.ERROR, repr(e))
 
+    @property
+    def isDebug(self):
+        return self.loglevel==LogLevel.DEBUG
+
 
 
 

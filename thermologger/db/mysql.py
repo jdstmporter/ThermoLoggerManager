@@ -1,7 +1,6 @@
 import mysql.connector
 
 from thermologger.common.records import Record
-from thermologger.common.beacons import Beacons
 
 
 

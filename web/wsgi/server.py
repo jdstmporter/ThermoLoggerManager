@@ -1,8 +1,8 @@
 from datetime import datetime
-import re
 from urllib.parse import parse_qs, urlparse
 import json
 from http import HTTPStatus
+from thermologger.common import syslog, LogLevel
 
 from thermologger.db import SQLStore
 
@@ -66,7 +66,6 @@ class WSGIApp:
             return self._get_schema()
         elif path == '/beacons':
             return self._get_beacons()
-
         else:
             return ResponseObject(status=HTTPStatus.NOT_FOUND)
 
@@ -87,7 +86,7 @@ class WSGIApp:
             else:
                 responder = ResponseObject(status=HTTPStatus.NOT_IMPLEMENTED)
         except Exception as e:
-            print(f'Error : {e}')
+            syslog(LogLevel.ERROR,f'Error : {e}')
             responder = ResponseObject(status=HTTPStatus.INTERNAL_SERVER_ERROR)
 
         responder(start_response)
