@@ -86,7 +86,7 @@ class WSGIApp:
             else:
                 responder = ResponseObject(status=HTTPStatus.NOT_IMPLEMENTED)
         except Exception as e:
-            syslog(LogLevel.ERROR,f'Error : {e}')
+            syslog(LogLevel.ERROR,f'Error {type(e).__name__}: {e}')
             responder = ResponseObject(status=HTTPStatus.INTERNAL_SERVER_ERROR)
 
         responder(start_response)

@@ -1,5 +1,6 @@
 import mysql.connector
 
+from thermologger.common import LogLevel, syslog
 from thermologger.common.records import Record
 
 
@@ -14,7 +15,13 @@ class SQLStore:
     def close(self):
         self.db.close()
 
+    def check(self):
+        if not self.db.is_connected():
+            syslog(LogLevel.INFO,'MySQL connection stale; attempting to reconnect');
+            self.db.reconnect()
+
     def read(self) -> [Record]:
+        self.check()
         cursor = self.db.cursor()
         query = 'SELECT mac, sensor, timestamp, temperature, humidity, battery FROM records ORDER BY seq'
         cursor.execute(query)
@@ -25,14 +32,16 @@ class SQLStore:
         return out
 
     def beacons(self) -> dict:
-        cursor = self.db.cursor()
         try:
+            self.check()
+            cursor = self.db.cursor()
             query = 'SELECT mac, name from sensors'
             cursor.execute(query)
             out = {mac: name for (mac, name) in cursor}
+            cursor.close()
         except:
             out = {}
-        cursor.close()
+
         return out
 
     def _get_pks(self) -> set :
@@ -54,6 +63,7 @@ class SQLStore:
         vals = ', '.join([r.sql(beacons) for r in records])
         sql = f"INSERT INTO records (mac, sensor, timestamp, temperature, humidity, battery) values {vals}"
         print(sql)
+        self.check()
         cursor = self.db.cursor()
         cursor.execute(sql)
         self.db.commit()
