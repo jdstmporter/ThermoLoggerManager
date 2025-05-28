@@ -1,8 +1,23 @@
+import datetime
+import math
+
 import mysql.connector
 
 from thermologger.common import LogLevel, syslog
 from thermologger.common.records import Record
 
+class BeaconData:
+    def __init__(self,mac,name,known):
+        self.mac=mac
+        self.name=name
+        self.known=bool(known)
+
+    def dict(self):
+        return {
+           'mac': self.mac,
+           'name': self.name,
+           'known': self.known
+        }
 
 
 class SQLStore:
@@ -17,8 +32,23 @@ class SQLStore:
 
     def check(self):
         if not self.db.is_connected():
-            syslog(LogLevel.INFO,'MySQL connection stale; attempting to reconnect');
+            syslog(LogLevel.INFO,'MySQL connection stale; attempting to reconnect')
             self.db.reconnect()
+
+    def query(self, query: str) -> list[tuple]:
+        self.check()
+        cursor = self.db.cursor()
+        cursor.execute(query)
+        out = [x for x in cursor]
+        cursor.close()
+        return out
+
+    def time_range(self):
+        out = self.query('select max(timestamp), min(timestamp) from records')
+        if len(out)>0:
+            return out[0]
+        else:
+            return (datetime.datetime.now().timestamp(),0)
 
     def read(self) -> [Record]:
         self.check()
@@ -37,11 +67,22 @@ class SQLStore:
             cursor = self.db.cursor()
             query = 'SELECT mac, name from sensors'
             cursor.execute(query)
-            out = {mac: name for (mac, name) in cursor}
+            out = {mac : BeaconData(mac,name,True) for (mac, name) in cursor}
             cursor.close()
         except:
             out = {}
+        return out
 
+    def beaconsInRecords(self) -> list[BeaconData]:
+        try:
+            self.check()
+            cursor = self.db.cursor()
+            query = 'SELECT DISTINCT mac, sensor, known from records'
+            cursor.execute(query)
+            out = [BeaconData(mac, name, known) for (mac, name, known) in cursor]
+            cursor.close()
+        except:
+            out = []
         return out
 
     def _get_pks(self) -> set :
@@ -57,11 +98,20 @@ class SQLStore:
         record = cursor.fetchone()
         return record[0]+1
 
+    def update(self,sql):
+        self.check()
+        cursor = self.db.cursor()
+        cursor.execute(sql)
+        self.db.commit()
+        cursor.close()
+
+
+
 
     def write(self,records : [Record]):
         beacons = self.beacons()
         vals = ', '.join([r.sql(beacons) for r in records])
-        sql = f"INSERT INTO records (mac, sensor, timestamp, temperature, humidity, battery) values {vals}"
+        sql = f"INSERT INTO records (mac, sensor, known, timestamp, temperature, humidity, battery) values {vals}"
         print(sql)
         self.check()
         cursor = self.db.cursor()

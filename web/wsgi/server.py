@@ -52,20 +52,51 @@ class WSGIApp:
 
     def _get_beacons(self,*args):
         beacons = self.sql.beacons()
-        data = json.dumps(beacons)
+        data = json.dumps([b.dict() for b in beacons.values()])
         return ResponseObject(contentType='application/json',
                               text=data.encode('utf-8'))
 
+    def _get_range(self,*args):
+        r = self.sql.time_range()
+        data = json.dumps({ 'max' : r[0], 'min' : r[1]})
+        return ResponseObject(contentType='application/json',
+                              text=data.encode('utf-8'))
+
+    def _get_all(self,query,*args):
+        try:
+            args = parse_qs(query)
+            start = asDate(args.get('s', []), default=datetime.min)
+            end = asDate(args.get('e', []), default=datetime.max)
+        except:
+            start = datetime.min
+            end = datetime.max
+
+        records = self.sql.read()
+        timeRange = self.sql.time_range()
+        beacons = self.sql.beacons()
+
+        obj = {
+            'beacons' : [b.dict() for b in beacons.values()],
+            'range' : {'max': timeRange[0], 'min': timeRange[1]},
+            'records' : [r.dict() for r in records]
+        }
+        data = json.dumps(obj)
+        return ResponseObject(contentType='application/json',
+                              text=data.encode('utf-8'))
 
     def GET(self,path):
         parsed = urlparse(path)
         path = parsed.path
-        if path == '/data':
+        if path == '/all':
+            return self._get_all(parsed.query)
+        elif path == '/data':
             return self._get_data(parsed.query)
         elif path == '/schema':
             return self._get_schema()
         elif path == '/beacons':
             return self._get_beacons()
+        elif path == '/time':
+            return self._get_range()
         else:
             return ResponseObject(status=HTTPStatus.NOT_FOUND)
 

@@ -16,6 +16,7 @@ create table if not exists AllSaints.sensors
 (
     mac  varchar(64) not null,
     name varchar(64) not null,
+    known tinyint(1) not null default 1,
     constraint macs_index
         unique (mac)
 );

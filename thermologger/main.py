@@ -40,7 +40,7 @@ class RunLoop:
             try:
                 things = SQLStore(self.params)
                 things.write(records)
-                syslog(LogLevel.INFO,'Uploaded')
+                syslog(LogLevel.INFO,'Uploaded records')
             except Exception as e:
                 syslog(LogLevel.ERROR,f'Error: {str(e)}')
 
