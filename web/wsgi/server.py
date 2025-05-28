@@ -56,6 +56,11 @@ class WSGIApp:
         return ResponseObject(contentType='application/json',
                               text=data.encode('utf-8'))
 
+    def _get_range(self,*args):
+        (ma, mi) = self.sql.time_range()
+        data = json.dumps({'start': mi, 'end': ma})
+        return ResponseObject(contentType='application/json',
+                              text=data.encode('utf-8'))
 
     def GET(self,path):
         parsed = urlparse(path)
@@ -66,6 +71,8 @@ class WSGIApp:
             return self._get_schema()
         elif path == '/beacons':
             return self._get_beacons()
+        elif path == '/range':
+            return self._get_range()
         else:
             return ResponseObject(status=HTTPStatus.NOT_FOUND)
 

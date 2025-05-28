@@ -2,7 +2,7 @@ import mysql.connector
 
 from thermologger.common import LogLevel, syslog
 from thermologger.common.records import Record
-
+from datetime import datetime
 
 
 class SQLStore:
@@ -19,6 +19,22 @@ class SQLStore:
         if not self.db.is_connected():
             syslog(LogLevel.INFO,'MySQL connection stale; attempting to reconnect');
             self.db.reconnect()
+
+    def _query(self,sql) -> list[tuple]:
+        self.check()
+        cursor = self.db.cursor()
+        cursor.execute(sql)
+        out = [x for x in cursor]
+        cursor.close()
+        return out
+
+    def time_range(self):
+        out = self._query('select max(timestamp), min(timestamp) from records')
+        if len(out)>0:
+            return out[0]
+        else:
+            return (datetime.now().timestamp(),0)
+
 
     def read(self) -> [Record]:
         self.check()
