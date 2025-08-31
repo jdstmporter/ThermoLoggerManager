@@ -1,8 +1,8 @@
 from .protocol import WSGIEnvironment, ResponseObject
-from .handlers import URLManip, OPTIONSHandler, GETHandler
+from .handlers import OPTIONSHandler, GETHandler
 from datetime import datetime
 from http import HTTPStatus
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import parse_qs
 import json
 from thermologger.common import syslog, LogLevel
 
