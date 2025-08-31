@@ -1,5 +1,6 @@
 {
   "web_ip" : "0.0.0.0",
   "web_port" : 8080,
-  "static_port" : 8088
+  "static_port" : 8088,
+  "debugWeb": false
 }

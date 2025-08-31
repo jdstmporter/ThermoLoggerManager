@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 from thermologger.common import Params, syslog, LogLevel
-from web.wsgi import WSGIApp
-from wsgiref.simple_server import make_server
+from web.wsgi import WSGIApp, Server
+from wsgiref.simple_server import make_server, WSGIServer
+
+
 
 def server(config = 'config/config.json'):
     params = Params.load(config)
@@ -12,7 +14,7 @@ def server(config = 'config/config.json'):
     ip=params.web_ip
     port=params.web_port
     syslog(LogLevel.INFO,f'Serving on port {ip}:{port}')
-    httpd = make_server(ip, port, app)
+    httpd = Server(ip, port, app)
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:

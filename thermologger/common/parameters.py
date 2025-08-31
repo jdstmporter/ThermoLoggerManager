@@ -21,7 +21,8 @@ class Params(Loadable):
             db_password='sql',
             db_port=3306,
             web_ip='0.0.0.0',
-            web_port=8080
+            web_port=8080,
+            debugWeb=False
         )
         d.update(kwargs)
         super().__init__(**d)

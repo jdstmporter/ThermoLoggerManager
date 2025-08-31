@@ -42,6 +42,7 @@ class TempGETHandler(GETHandler):
         return json.dumps({'start': mi, 'end': ma})
 
 
+
 class WSGIApp:
 
     handlers = dict(GET=TempGETHandler)
@@ -53,6 +54,7 @@ class WSGIApp:
         self.dynamic_port = params.web_port
         self.cors_permitted = set()
         self.headers = WSGIEnvironment()
+        self.debug = params.debugWeb
 
     def __call__(self, environ, start_response):
         keys = [
@@ -67,18 +69,9 @@ class WSGIApp:
                 'HTTP_SEC_FETCH_SITE'
             ]
         try:
-            '''
-            syslog(LogLevel.INFO,"Environment dictionary")
-            for k in keys:
-                syslog(LogLevel.INFO,f'{k} : {environ.get(k)}')
-            self.headers.load(environ)
-            syslog(LogLevel.INFO,'Headers')
-            for k in self.headers.header_keys():
-                syslog(LogLevel.INFO,f'{k} : {self.headers.header(k)}')
-            origin_port = URLManip(self.headers.header('Origin')).port
-            wsgi_port = URLManip(self.headers.header('Host')).port
-            syslog(LogLevel.INFO, f'STATIC {origin_port}, DYNAMIC {wsgi_port}')
-'''
+            if self.debug:
+                self._debug(keys,environ)
+
             path = environ.get('PATH_INFO')
             origin = environ.get('HTTP_ORIGIN')
             method = environ.get('REQUEST_METHOD')
@@ -91,9 +84,21 @@ class WSGIApp:
             else:
                 responder = ResponseObject(status=HTTPStatus.NOT_IMPLEMENTED)
         except Exception as e:
-            syslog(LogLevel.ERROR,f'Error {type(e).__name__}: {e}')
+            syslog(LogLevel.CRITICAL,f'Error {type(e).__name__}: {e}')
             responder = ResponseObject(status=HTTPStatus.INTERNAL_SERVER_ERROR)
 
         responder(start_response)
         return responder.text
+
+    def _debug(self,keys,environ):
+        syslog(LogLevel.INFO, "Environment dictionary")
+        for k in keys:
+            syslog(LogLevel.INFO, f'{k} : {environ.get(k)}')
+        self.headers.load(environ)
+        syslog(LogLevel.INFO, 'Headers')
+        for k in self.headers.header_keys():
+            syslog(LogLevel.INFO, f'{k} : {self.headers.header(k)}')
+        origin_port = URLManip(self.headers.header('Origin')).port
+        wsgi_port = URLManip(self.headers.header('Host')).port
+        syslog(LogLevel.INFO, f'STATIC {origin_port}, DYNAMIC {wsgi_port}')
 

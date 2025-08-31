@@ -19,7 +19,7 @@ class URLManip:
             self.port = None
             self.path = None
 
-class WSGIAction:
+class BaseHandler:
     def __init__(self,uri,cors=False,origin=None):
         self.uri=uri
         self.cors=cors
@@ -37,7 +37,10 @@ class WSGIAction:
     def __call__(self):
         return self._error(HTTPStatus.NOT_FOUND)
 
-class GETHandler(WSGIAction):
+
+        
+
+class GETHandler(BaseHandler):
     def __init__(self,uri,cors=False,origin=None):
         super().__init__(uri,cors=cors,origin=origin)
         self.parsed=urlparse(self.uri)
@@ -60,12 +63,7 @@ class GETHandler(WSGIAction):
     def schema(self):
        return ''
 
-
-
-
-
-
-class OPTIONSHandler(WSGIAction):
+class OPTIONSHandler(BaseHandler):
     def __init__(self,uri,method='GET',origin=None):
         super().__init__(uri,origin=origin)
         self.method=method

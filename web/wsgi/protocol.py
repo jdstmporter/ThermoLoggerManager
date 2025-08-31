@@ -12,11 +12,16 @@ class ResponseObject:
         self.text = [text]
 
     def __call__(self,respond):
-        syslog(LogLevel.INFO,f"Response: {self.status}")
-        for h in self.headers:
-            syslog(LogLevel.INFO,f'{h[0]},{h[1]}')
-        s_txt = f'{self.status.value} {self.status.phrase}'
-        respond(s_txt, self.headers)
+        try:
+            syslog(LogLevel.INFO,f"Response: {self.status}")
+            for h in self.headers:
+                syslog(LogLevel.INFO,f'{h[0]},{h[1]}')
+            s_txt = f'{self.status.value} {self.status.phrase}'
+            respond(s_txt, self.headers)
+        except Exception as e:
+            syslog(LogLevel.CRITICAL,f"Error: {e}")
+            respond(f'500 SERVER ERROR',self.headers)
+
 
 class WSGIHeaders:
     def __init__(self):
