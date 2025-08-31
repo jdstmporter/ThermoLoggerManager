@@ -1,10 +1,10 @@
+from collections import defaultdict
+
 from thermologger.common import syslog, LogLevel
 from urllib.parse import urlparse
-from http import HTTPStatus
+from http import HTTPStatus, HTTPMethod
 import re
 from .protocol import ResponseObject
-
-
 
 
 class URLManip:
@@ -38,19 +38,19 @@ class BaseHandler:
         return self._error(HTTPStatus.NOT_FOUND)
 
 
-        
 
 class GETHandler(BaseHandler):
-    def __init__(self,uri,cors=False,origin=None):
+    def __init__(self,uri,cors=False,origin=None,routes=[]):
         super().__init__(uri,cors=cors,origin=origin)
         self.parsed=urlparse(self.uri)
         if self.cors:
             self.headers.append(('Access-Control-Allow-Origin',origin))
+        self.routes=routes
 
     def __call__(self):
         try:
             path=self.parsed.path[1:]
-            if path in ['data','schema','beacons','range']:
+            if path in self.routes:
                 action = getattr(self,path[1:])
                 data = action()
                 return self._response(data=data)
@@ -62,6 +62,21 @@ class GETHandler(BaseHandler):
 
     def schema(self):
        return ''
+
+class HEADERHandler(BaseHandler):
+    def __init__(self,uri,cors=False,origin=None):
+        super().__init__(uri,cors=cors,origin=origin)
+        self.parsed=urlparse(self.uri)
+        if self.cors:
+            self.headers.append(('Access-Control-Allow-Origin',origin))
+
+    def __call__(self):
+        return self._response(data='')
+
+    def schema(self):
+       return ''
+
+
 
 class OPTIONSHandler(BaseHandler):
     def __init__(self,uri,method='GET',origin=None):
@@ -81,3 +96,43 @@ class OPTIONSHandler(BaseHandler):
             return self._response(status=HTTPStatus.NO_CONTENT)
         else:
             return self._error(status=HTTPStatus.FORBIDDEN)
+
+
+class HandlerContainer:
+
+    def __init__(self):
+        self._handlers = defaultdict(lambda : BaseHandler)
+        self._methods = HTTPMethod.__members__.values()
+
+    def _getMethod(self,value):
+        if type(value) == str:
+            return HTTPMethod.__members__.get(value.upper(),HTTPMethod.HEAD)
+        elif type(value) == HTTPMethod:
+            return value
+        else:
+            return HTTPMethod.HEAD
+
+    def __getitem__(self, item : str|HTTPMethod):
+        return self._handlers[self._getMethod(item)]
+
+    def __setitem__(self, key, value):
+        try:
+            self._handlers[self._getMethod(key)]=value
+        except:
+            pass
+
+    def __getattr__(self,item):
+        return self[item]
+
+    def extend(self,**kwargs):
+        for k,v in kwargs:
+            self[k]=v
+
+    @classmethod
+    def Load(cls,**kwargs):
+        the = HandlerContainer()
+        the[HTTPMethod.OPTIONS] = OPTIONSHandler
+        the[HTTPMethod.HEAD] = HEADERHandler
+
+
+

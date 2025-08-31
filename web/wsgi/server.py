@@ -17,8 +17,9 @@ def asDate(lst,default=datetime.min):
 class TempGETHandler(GETHandler):
 
     def __init__(self,path,sql,origin=None,cors=False):
-        super().__init__(path,cors=cors,origin=origin)
+        super().__init__(path,cors=cors,origin=origin,routes=['data','schema','beacons','range'])
         self.sql=sql
+
 
     def data(self):
         try:
