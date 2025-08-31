@@ -1,1 +1,1 @@
-from .wsgiserver import Server
+from .wsgiserver import SafeWSGIServer

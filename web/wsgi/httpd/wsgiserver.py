@@ -12,5 +12,5 @@ class SafeWSGIRequestHandler(WSGIRequestHandler):
             syslog(LogLevel.WARNING,f'Client Error: {e}')
 
 
-def Server(ip: str, port: int, app):
+def SafeWSGIServer(ip: str, port: int, app):
     return make_server(ip, port, app, WSGIServer, SafeWSGIRequestHandler)

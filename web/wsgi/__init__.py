@@ -1,2 +1,2 @@
 from .server import WSGIApp
-from .httpd import Server
+from .httpd import SafeWSGIServer
