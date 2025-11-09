@@ -19,9 +19,11 @@ class GETHandler(HEADERHandler):
 
     def __call__(self):
         try:
+            syslog(LogLevel.DEBUG,f'Full path is {self.parsed.path}')
             path=self.parsed.path[1:]
+            syslog(LogLevel.DEBUG, f'Truncated path is {path}')
             if path in self.routes:
-                action = getattr(self,path[1:])
+                action = getattr(self,path)
                 data = action()
                 return self._response(data=data)
             else:
@@ -39,13 +41,15 @@ class OPTIONSHandler(BaseHandler):
 
     def __call__(self):
         if self.method == 'GET':
-            #self.cors_permitted.add(self.origin)
-            self.headers.extend([
-                ('Access-Control-Allow-Origin', self.origin),
+            extra_headers=[
                 ('Access-Control-Allow-Methods', 'GET'),
                 ('Access-Control-Allow-Headers', 'Content-Type, Accept'),
                 ('Access-Control-Max-Age', '86400')
-            ])
+            ]
+            if self.origin is not None:
+                extra_headers.append(('Access-Control-Allow-Origin', self.origin))
+            #self.cors_permitted.add(self.origin)
+            self.headers.extend(extra_headers)
             return self._response(status=HTTPStatus.NO_CONTENT)
         else:
             return self._error(status=HTTPStatus.FORBIDDEN)

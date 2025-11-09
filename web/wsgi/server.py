@@ -1,5 +1,5 @@
 from .protocol import WSGIEnvironment, ResponseObject
-from .handlers import OPTIONSHandler, GETHandler
+from .handlers import OPTIONSHandler, GETHandler, URLManip
 from datetime import datetime
 from http import HTTPStatus
 from urllib.parse import parse_qs
@@ -55,13 +55,14 @@ class WSGIApp:
         self.dynamic_port = params.web_port
         self.cors_permitted = set()
         self.headers = WSGIEnvironment()
-        self.debug = params.debugWeb
+        self.debug = True #params.debugWeb
 
     def __call__(self, environ, start_response):
         keys = [
                 'PATH_INFO',
                 'REQUEST_METHOD',
                 'HTTP_ORIGIN',
+                'HTTP_REFERER',
                 'HTTP_HOST',
                 'HTTP_ACCEPT',
                 'HTTP_ACCESS_CONTROL_REQUEST_METHOD',
@@ -70,12 +71,15 @@ class WSGIApp:
                 'HTTP_SEC_FETCH_SITE'
             ]
         try:
+            self.headers.load(environ)
             if self.debug:
                 self._debug(keys,environ)
 
             path = environ.get('PATH_INFO')
             origin = environ.get('HTTP_ORIGIN')
             method = environ.get('REQUEST_METHOD')
+            if origin is None:
+                origin = environ.get('HTTP_REFERER')
             if method == 'GET':
                 cors = environ.get('HTTP_SEC_FETCH_MODE') is not None
                 responder = self.handlers['GET'](path,origin=origin,cors=cors,sql=self.sql)()
@@ -95,7 +99,7 @@ class WSGIApp:
         syslog(LogLevel.INFO, "Environment dictionary")
         for k in keys:
             syslog(LogLevel.INFO, f'{k} : {environ.get(k)}')
-        self.headers.load(environ)
+
         syslog(LogLevel.INFO, 'Headers')
         for k in self.headers.header_keys():
             syslog(LogLevel.INFO, f'{k} : {self.headers.header(k)}')
