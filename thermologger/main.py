@@ -1,56 +1,31 @@
 #!/usr/bin/env python3
 
-import sched
-import time
-
-
-from thermologger.api import ScanForUpdates
-from thermologger.db import SQLStore
-from thermologger.common import Params, syslog, LogLevel
+from argparse import ArgumentParser, ArgumentError
+from .runloop import RunLoop
 
 
 
 
-class RunLoop:
 
-    def __init__(self,config='config/config.json'):
-        print(f'Loading config from {config}')
-        self.params = Params.load(config)
-        self.scheduler = sched.scheduler(time.time, time.sleep)
-
-
-
-    def action(self):
-        scanner = ScanForUpdates(self.params)
-        beacons = scanner.run()
-
-        if syslog.isDebug:
-            syslog(LogLevel.DEBUG,f'Got {len(beacons)} records')
-            for beacon in beacons:
-                syslog(LogLevel.DEBUG,str(beacon))
-
-        if len(beacons) > 0:
-            records = [b.record() for b in beacons]
-            syslog(LogLevel.INFO,'Contacting SQL')
-            try:
-                things = SQLStore(self.params)
-                things.write(records)
-                syslog(LogLevel.INFO,'Uploaded')
-            except Exception as e:
-                syslog(LogLevel.ERROR,f'Error: {str(e)}')
-
-    def runner(self):
-        self.action()
-        self.scheduler.enter(self.params.wait_time, 1, self.runner, ())
-
-    def run(self):
-        self.runner()
-        try:
-            self.scheduler.run()
-        except KeyboardInterrupt:
-            syslog(LogLevel.INFO,'Exiting')
+def run(args):
+    parser = ArgumentParser(exit_on_error=False)
+    parser.add_argument('-l',dest='mode',action='store_const',const='live',help='Live mode')
+    parser.add_argument('-d', dest='mode', action='store_const', const='dev', help='Dev mode')
+    try:
+        opts = parser.parse_args(args)
+        mode = opts.mode=='live'
 
 
+        loop = RunLoop(is_live=mode)
+        loop.run()
+
+
+    except ArgumentError as e:
+        print(f'Args are {args}')
+        print(f'Error in provided options: {e}')
+        parser.print_help()
+    except Exception as e:
+        print(f'General error: {e}')
 
 
 

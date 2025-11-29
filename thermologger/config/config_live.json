@@ -1,6 +1,6 @@
 {
   "scan_time" : 20,
-  "wait_time" : 60,
+  "wait_time" : 300,
   "sensors" : {
     "c21200008b9d": "Choir",
     "dc060000f29d": "Kitchen",
@@ -8,5 +8,7 @@
     "690600008b9d": "Pulpit",
     "ab0100008b9d": "Lady Chapel",
     "260b0000f29d": "TEST"
-  }
+  },
+  "db_port" : 3336,
+  "db_host" : "localhost"
 }

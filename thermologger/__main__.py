@@ -1,4 +1,5 @@
-from .main import RunLoop
+from sys import argv
+from .main import run
 
-loop=RunLoop()
-loop.run()
+run(argv[1:])
+
