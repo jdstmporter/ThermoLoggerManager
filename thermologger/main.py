@@ -8,18 +8,13 @@ from thermologger.api import ScanForUpdates
 from thermologger.db import SQLStore
 from thermologger.common import Params, syslog, LogLevel
 
-'''
-    To read use
-
-    https://api.thingspeak.com/channels/<CHANNEL_ID>/feeds.json?api_key=<READ_KEY>&ndays=<N>
-'''
-
 
 
 
 class RunLoop:
 
     def __init__(self,config='config/config.json'):
+        print(f'Loading config from {config}')
         self.params = Params.load(config)
         self.scheduler = sched.scheduler(time.time, time.sleep)
 
