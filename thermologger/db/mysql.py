@@ -8,6 +8,8 @@ from datetime import datetime
 class SQLStore:
 
     def __init__(self,params):
+        print(f'Connecting to mysql')
+        print(f'DB = {params.db_database} HOST = {params.db_host} USER = {params.db_user} PASSWORD = {params.db_password} PORT = {params.db_port}')
         self.db = mysql.connector.connect(database=params.db_database,host=params.db_host,
                                           user=params.db_user,password=params.db_password,
                                           port=params.db_port)

@@ -23,7 +23,7 @@ class Record:
         return f'{self.sensor} @ {self.timestamp}: T {self.temperature}C H {self.humidity}% B {self.battery}%'
 
     def sql(self,beacons):
-        sensor = beacons[self.sensor]
+        sensor = beacons.get(self.sensor,self.mac)
         return f"('{self.mac}', '{sensor}', {int(self.ts)}, {self.temperature}, {self.humidity}, {self.battery})"
 
     def dict(self):

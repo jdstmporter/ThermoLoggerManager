@@ -3,6 +3,8 @@ import sys
 import enum
 import traceback
 
+from .hostinfo import HostInfo
+
 
 class LogLevel(enum.IntEnum):
     DEBUG = 0
@@ -22,11 +24,27 @@ def logLambda(obj,level):
         return obj(level,message)
     return action
 
+class SafeFile:
+    def __init__(self,filename : str):
+        # noinspection PyBroadException
+        try:
+            self.file = open(filename, 'ab')
+        except:
+            self.file = None
+
+    def write(self,data):
+        if self.file is not None:
+            self.file.write(data)
+
+    def close(self):
+        if self.file is not None:
+            self.file.close()
+
 
 class Log:
 
     def __init__(self, logfile='syslog.log', loglevel = LogLevel.DEBUG, encoding='utf-8'):
-        self.file = open(logfile, 'ab')
+        self.file = SafeFile(logfile)
         self.loglevel = loglevel
         self.encoding = encoding
 
@@ -79,8 +97,8 @@ class Log:
         return self.loglevel==LogLevel.DEBUG
 
 
-
-syslog = Log()
+logfile = 'syslog.log' if HostInfo.is_MAC else '/var/log/thermologger.log'
+syslog = Log(logfile = logfile)
 
 if __name__ == '__main__':
     print(LogLevel.__members__)

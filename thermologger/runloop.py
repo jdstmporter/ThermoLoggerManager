@@ -11,8 +11,7 @@ from thermologger.common import Params, syslog, LogLevel
 
 class RunLoop:
 
-    def __init__(self,is_live=False,config_live='/etc/thermologger/config.json',config_dev='config/config.json'):
-        path = config_live if is_live else config_dev
+    def __init__(self,path):
         self.params = Params.load(path)
         self.scheduler = sched.scheduler(time.time, time.sleep)
 
@@ -35,6 +34,7 @@ class RunLoop:
                 things.write(records)
                 syslog(LogLevel.INFO,'Uploaded')
             except Exception as e:
+
                 syslog(LogLevel.ERROR,f'Error: {str(e)}')
 
     def runner(self):
