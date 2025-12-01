@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+cd /usr/local/src
+python3 -m thermologger $@

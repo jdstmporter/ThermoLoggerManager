@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+
+SRC_DIR="./thermologger"
+SCRIPT_DIR="${SRC_DIR}/scripts"
+
+function update_thermo {
+  rm -fr /usr/local/src/thermologger.bak
+  mv /usr/local/src/thermologger /usr/local/src/thermologger.bak 2> /dev/null
+  cp -r ${SRC_DIR} /usr/local/src/
+
+  cp ${SCRIPT_DIR}/thermologger /usr/local/bin
+  chmod 755 /usr/local/bin/thermologger
+}
+
+function update_config {
+  mkdir /etc/thermologger 2> /dev/null
+  cp ${SRC_DIR}/config/config_live.json /etc/thermologger/config.json
+}
+
+function update_tunnel {
+  cp ${SCRIPT_DIR}/neptune-tunnel /etc/default/neptune-tunnel
+
+  systemd stop neptune-tunnel 2> /dev/null
+  cp ${SCRIPT_DIR}/neptune-tunnel.service /etc/systemd/system
+  systemd reload daemon
+  systemd start neptune-tunnel
+}
+
+if [ "$EUID" -ne 0 ]
+  then echo "Please run as root"
+  exit
+fi
+
+case $1 in
+  "app")
+    update_thermo
+    ;;
+  "config")
+    update_config
+    ;;
+  "tunnel")
+    update_tunnel
+    ;;
+  *)
+    echo "usage: installer [app|config|tunnel]"
+    ;;
+esac
+
+
+
+
+
