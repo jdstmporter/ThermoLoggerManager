@@ -1,27 +1,27 @@
 #!/usr/bin/env bash
 
 SRC_DIR="./thermologger"
-SCRIPT_DIR="${SRC_DIR}/scripts/usr/local/bin"
+CONF_DIR="${SRC_DIR}/scripts"
 
 function update_thermo {
   rm -fr /usr/local/src/thermologger.bak
   mv /usr/local/src/thermologger /usr/local/src/thermologger.bak 2> /dev/null
   cp -r ${SRC_DIR} /usr/local/src/
 
-  cp ${SCRIPT_DIR}/thermologger /usr/local/bin
+  cp ${CONF_DIR}/usr/local/bin/thermologger /usr/local/bin
   chmod 755 /usr/local/bin/thermologger
 }
 
 function update_config {
   mkdir /etc/thermologger 2> /dev/null
-  cp ${SRC_DIR}/etc/thermologger/*.json /etc/thermologger
+  cp ${CONF_DIR}/etc/thermologger/*.json /etc/thermologger
 }
 
 function update_tunnel {
   systemd stop neptune-tunnel 2> /dev/null
   systemd stop thermologger 2> /dev/null
-  cp ${SCRIPT_DIR}/etc/systemd/* /etc/systemd
-  cp ${SCRIPT_DIR}/etc/default/* /etc/default
+  cp ${CONF_DIR}/etc/systemd/* /etc/systemd
+  cp ${CONF_DIR}/etc/default/* /etc/default
 
   systemd reload daemon
   systemd start neptune-tunnel
