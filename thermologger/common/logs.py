@@ -18,6 +18,13 @@ class LogLevel(enum.IntEnum):
         name=name.upper()
         return cls.__members__[name]
 
+    @classmethod
+    def safe_named(cls,name : str, default = None):
+        try:
+            return cls.named(name)
+        except:
+            return default
+
 
 def logLambda(obj,level):
     def action(message):
@@ -43,8 +50,8 @@ class SafeFile:
 
 class Log:
 
-    def __init__(self, logfile='syslog.log', loglevel = LogLevel.DEBUG, encoding='utf-8'):
-        self.file = SafeFile(logfile)
+    def __init__(self, filename='syslog.log', loglevel = LogLevel.DEBUG, encoding='utf-8'):
+        self.file = SafeFile(filename)
         self.loglevel = loglevel
         self.encoding = encoding
 
@@ -96,9 +103,12 @@ class Log:
     def isDebug(self):
         return self.loglevel==LogLevel.DEBUG
 
+    def set_level(self,level):
+        self.loglevel=level
+
 
 logfile = 'syslog.log' if HostInfo.is_MAC else '/var/log/thermologger.log'
-syslog = Log(logfile = logfile)
+syslog = Log(logfile)
 
 if __name__ == '__main__':
     print(LogLevel.__members__)

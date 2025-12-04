@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 SRC_DIR="./thermologger"
-SCRIPT_DIR="${SRC_DIR}/scripts"
+SCRIPT_DIR="${SRC_DIR}/scripts/usr/local/bin"
 
 function update_thermo {
   rm -fr /usr/local/src/thermologger.bak
@@ -14,16 +14,18 @@ function update_thermo {
 
 function update_config {
   mkdir /etc/thermologger 2> /dev/null
-  cp ${SRC_DIR}/config/config_live.json /etc/thermologger/config.json
+  cp ${SRC_DIR}/etc/thermologger/*.json /etc/thermologger
 }
 
 function update_tunnel {
-  cp ${SCRIPT_DIR}/neptune-tunnel /etc/default/neptune-tunnel
-
   systemd stop neptune-tunnel 2> /dev/null
-  cp ${SCRIPT_DIR}/neptune-tunnel.service /etc/systemd/system
+  systemd stop thermologger 2> /dev/null
+  cp ${SCRIPT_DIR}/etc/systemd/* /etc/systemd
+  cp ${SCRIPT_DIR}/etc/default/* /etc/default
+
   systemd reload daemon
   systemd start neptune-tunnel
+  systemd strt thermologger
 }
 
 if [ "$EUID" -ne 0 ]

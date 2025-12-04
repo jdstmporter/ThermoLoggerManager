@@ -1,0 +1,14 @@
+[Unit]
+Description=Collect data from nearby ThermoBeacon sensors, and forward to database on server
+After=network.target neptune-tunnel.service dbus.org.bluez.service
+
+[Service]
+User=thermo
+Group=thermo
+ExecStart=/usr/local/bin/thermologger
+RestartSec=30
+Restart=on-failure
+
+
+[Install]
+WantedBy=multi-user.target
