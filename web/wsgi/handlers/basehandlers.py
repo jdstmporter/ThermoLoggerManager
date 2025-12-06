@@ -1,8 +1,4 @@
-from collections import defaultdict
-
-from thermologger.common import syslog, LogLevel
-from urllib.parse import urlparse
-from http import HTTPStatus, HTTPMethod
+from http import HTTPStatus
 import re
 from web.wsgi.protocol import ResponseObject
 

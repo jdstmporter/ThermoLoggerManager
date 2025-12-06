@@ -1,7 +1,7 @@
 
 from wsgiref.simple_server import make_server, WSGIServer
 from wsgiref.simple_server import WSGIRequestHandler
-from thermologger.common import syslog, LogLevel
+from web.common import syslog, LogLevel
 
 
 class SafeWSGIRequestHandler(WSGIRequestHandler):

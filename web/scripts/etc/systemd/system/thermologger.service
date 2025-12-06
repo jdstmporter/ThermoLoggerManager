@@ -1,0 +1,14 @@
+[Unit]
+Description=Thermologger Python web server
+After=network.target mysql.service
+
+[Service]
+User=thermo
+Group=thermo
+ExecStart=/usr/local/bin/thermologger
+RestartSec=30
+Restart=on-failure
+
+
+[Install]
+WantedBy=multi-user.target

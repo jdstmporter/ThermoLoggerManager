@@ -1,0 +1,5 @@
+TARGET=tunnel@neptune.vm.tornadovps.net
+LOCAL_ADDR=0.0.0.0
+LOCAL_PORT=3336
+REMOTE_PORT=3306
+IDENTITY_FILE=/home/as/.ssh/id_nep_ssh

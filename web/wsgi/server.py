@@ -4,9 +4,8 @@ from datetime import datetime
 from http import HTTPStatus
 from urllib.parse import parse_qs
 import json
-from thermologger.common import syslog, LogLevel
-
-from thermologger.db import SQLStore
+from web.common import syslog, LogLevel
+from web.db import SQLStore
 
 def asDate(lst,default=datetime.min):
     try:

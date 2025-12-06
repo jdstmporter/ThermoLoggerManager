@@ -1,5 +1,5 @@
-from thermologger.common import syslog, LogLevel
-from .basehandlers import BaseHandler, urlparse
+from web.common import syslog, LogLevel
+from .basehandlers import BaseHandler
 from http import HTTPStatus
 
 class HEADERHandler(BaseHandler):

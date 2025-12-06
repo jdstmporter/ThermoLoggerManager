@@ -1,3 +1,4 @@
-from .main import server
+from sys import argv
+from .main import run
 
-server()
+run(argv[1:])

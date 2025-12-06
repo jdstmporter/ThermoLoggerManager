@@ -1,6 +1,6 @@
 from collections import defaultdict
 from http import HTTPStatus
-from thermologger.common import syslog, LogLevel
+from web.common import syslog, LogLevel
 import re
 
 class ResponseObject:

@@ -1,0 +1,15 @@
+[Unit]
+Description=Setup a secure tunnel to neptune.vm.tornadovps.net
+After=network.target
+
+[Service]
+EnvironmentFile=/etc/default/neptune-tunnel
+User=as
+Group=as
+ExecStart=/usr/bin/ssh -NT -o ServerAliveInterval=60 -o ExitOnForwardFailure=yes -L 3336:127.0.0.1:3306 -i ${IDENTITY_FILE} ${TARGET}
+RestartSec=5
+Restart=always
+
+
+[Install]
+WantedBy=multi-user.target

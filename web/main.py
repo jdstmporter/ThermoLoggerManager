@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-from thermologger.common import Params, syslog, LogLevel
+from web.common import Params, syslog, LogLevel, CmdLineArgs
 from web.wsgi import WSGIApp, SafeWSGIServer
-from wsgiref.simple_server import make_server, WSGIServer
 
+config_live='/etc/thermologger/config.json'
+config_dev='config/config.json'
 
 
 def server(config = 'config/config.json'):
@@ -23,5 +24,13 @@ def server(config = 'config/config.json'):
 
 
 
-
+def run(args):
+    try:
+        parser = CmdLineArgs()
+        if parser(args):
+            syslog.set_level(parser.log_level)
+            server(config_live if parser.is_live else config_dev)
+        return 0
+    except Exception as e:
+        print(f'General error: {e}')
 
