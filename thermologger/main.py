@@ -10,7 +10,6 @@ config_dev='config/config.json'
 
 def run(args):
 
-
     try:
         parser = CmdLineArgs()
         if parser(args):

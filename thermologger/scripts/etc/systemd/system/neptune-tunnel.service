@@ -1,6 +1,6 @@
 [Unit]
 Description=Setup a secure tunnel to neptune.vm.tornadovps.net
-After=network.target neptune-tunnel.service dbus.org.bluez.service
+After=network.target
 
 [Service]
 EnvironmentFile=/etc/default/neptune-tunnel

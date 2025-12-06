@@ -26,7 +26,7 @@ class ThermoBeaconValues:
         self.button = False if value[1] == 0 else True
         self.mac = value[2:8].hex()
         battery = int.from_bytes(value[8:10], byteorder='little')
-        self.battery = battery * 100 / 3400
+        self.battery = battery * 100 / 3500
         self.temperature = decode_temperature(value[10:12])
         self.humidity = decode_humidity(value[12:14])
         self.uptime = int.from_bytes(value[14:18], byteorder='little')

@@ -14,19 +14,20 @@ function update_thermo {
 
 function update_config {
   mkdir /etc/thermologger 2> /dev/null
-  cp ${CONF_DIR}/etc/thermologger/*.json /etc/thermologger
+  cp "${CONF_DIR}/etc/thermologger/config.json" /etc/thermologger
+
 }
 
-function update_tunnel {
-  systemd stop neptune-tunnel 2> /dev/null
-  systemd stop thermologger 2> /dev/null
-  cp ${CONF_DIR}/etc/systemd/* /etc/systemd
-  cp ${CONF_DIR}/etc/default/* /etc/default
-
-  systemd reload daemon
-  systemd start neptune-tunnel
-  systemd strt thermologger
+function update_service() {
+  local service=$1
+  systemctl stop "$service" 2> /dev/null
+  cp "${CONF_DIR}/etc/systemd/system/${service}.service" /etc/systemd/system
+  cp "${CONF_DIR}/etc/default/$service" /etc/default 2> /dev/null
+  systemctl daemon-reload
+  systemctl start $service
 }
+
+
 
 if [ "$EUID" -ne 0 ]
   then echo "Please run as root"
@@ -36,12 +37,14 @@ fi
 case $1 in
   "app")
     update_thermo
+    update_service "thermologger"
     ;;
   "config")
     update_config
+    update_service "thermologger"
     ;;
   "tunnel")
-    update_tunnel
+    update_service "neptune-tunnel"
     ;;
   *)
     echo "usage: installer [app|config|tunnel]"

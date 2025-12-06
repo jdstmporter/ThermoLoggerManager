@@ -1,5 +1,5 @@
 from argparse import ArgumentParser, ArgumentError
-from .logs import LogLevel
+from .logs import LogLevel, syslog
 from .hostinfo import HostInfo
 
 class CmdLineArgs:
@@ -28,12 +28,12 @@ class CmdLineArgs:
                 print('Specified dev mode')
             else:
                 is_live = HostInfo.is_Server
-                print(f'Computed mode: live={is_live}')
+                syslog(LogLevel.INFO,f'Computed mode: live={is_live}')
 
             self.is_live = is_live
 
             log_level = LogLevel.safe_named(opts.loglevel,LogLevel.INFO)
-            print(f'Log level is {log_level.name}')
+            syslog(LogLevel.INFO,f'Setting Log Level to {log_level.name}')
             self.log_level = log_level
             return True
 
