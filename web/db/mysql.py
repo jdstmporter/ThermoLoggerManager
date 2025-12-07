@@ -62,6 +62,15 @@ class SQLStore:
 
         return out
 
+    def run_script(self,filename):
+        self.check()
+        cursor = self.db.cursor()
+        with open(filename) as sql:
+            cursor.execute(sql.read())
+        cursor.close()
+
+
+
 
 
 

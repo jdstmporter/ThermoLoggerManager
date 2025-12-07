@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-from web.common import Params, syslog, LogLevel, CmdLineArgs
-from web.wsgi import WSGIApp, SafeWSGIServer
+from .common import Params, syslog, LogLevel, CmdLineArgs
+from .wsgi import WSGIApp, SafeWSGIServer
 
 config_live='/etc/thermologger/config.json'
 config_dev='config/config.json'
-
 
 def server(config = 'config/config.json'):
     params = Params.load(config)
@@ -21,8 +20,6 @@ def server(config = 'config/config.json'):
     except KeyboardInterrupt:
         syslog(LogLevel.INFO,'Interrupt: exiting')
         httpd.server_close()
-
-
 
 def run(args):
     try:

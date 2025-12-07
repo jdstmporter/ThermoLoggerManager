@@ -1,0 +1,3 @@
+#!/usr/local/env bash
+
+mysql -u sql -psql < /usr/local/src/web/db_tools/fix-sensor-names.sql

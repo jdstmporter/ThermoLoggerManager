@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-
-
 from .runloop import RunLoop
 from .common import CmdLineArgs,syslog
 
@@ -17,8 +15,6 @@ def run(args):
             loop = RunLoop(config_live if parser.is_live else config_dev)
             loop.run()
         return 0
-
-
     except Exception as e:
         print(f'General error: {e}')
 
