@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+SRC_DIR="./web"
+CONF_DIR="${SRC_DIR}/scripts"
+
+APACHE_ROOT="/etc/apache2"
+APACHE_CONF="${APACHE_ROOT}/conf-available"
+
+function apache_conf {
+  a2disconf *
+  rm ${APACHE_CONF}/*
+  cp "${CONF_DIR}/etc/apache2/conf-available/*/conf" ${APACHE_CONF}
+  a2enconf server-name security serve-cgi-bin other-vhosts-access-log
+
+  a2enmod headers rewrite wsgi
+  cp "${CONF_DIR}/etc/apache2/mods-available/*.conf" "${APACHE_ROOT}/mods-available"
+
+
+
+  systemctl reload apache2
+}
+
