@@ -1,7 +1,6 @@
 import mysql.connector
 
-from thermologger.common import LogLevel, syslog
-from thermologger.common.records import Record
+from web.common import LogLevel, syslog, Record
 from datetime import datetime
 
 
