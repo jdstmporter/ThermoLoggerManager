@@ -32,7 +32,7 @@ class BaseHandler:
         return ResponseObject(status=status)
 
     def __call__(self):
-        return self._error(HTTPStatus.NOT_FOUND)
+        return self._error(status=HTTPStatus.NOT_FOUND)
 
 
 

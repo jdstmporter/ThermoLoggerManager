@@ -1,6 +1,7 @@
 from web.common import syslog, LogLevel
 from .basehandlers import BaseHandler
 from http import HTTPStatus
+from urllib.parse import urlparse
 
 class HEADERHandler(BaseHandler):
     def __init__(self,uri,cors=False,origin=None,routes=[]):
@@ -27,7 +28,7 @@ class GETHandler(HEADERHandler):
                 data = action()
                 return self._response(data=data)
             else:
-                return self._error()
+                return self._error(HTTPStatus.FORBIDDEN)
         except Exception as e:
             syslog(LogLevel.ERROR,f'Bad request for ${self.uri} : ${e}')
             return self._error(HTTPStatus.BAD_REQUEST)

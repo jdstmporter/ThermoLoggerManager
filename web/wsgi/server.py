@@ -46,6 +46,18 @@ class TempGETHandler(GETHandler):
 class WSGIApp:
 
     handlers = dict(GET=TempGETHandler)
+    keys = [
+        'PATH_INFO',
+        'REQUEST_METHOD',
+        'HTTP_ORIGIN',
+        'HTTP_REFERER',
+        'HTTP_HOST',
+        'HTTP_ACCEPT',
+        'HTTP_ACCESS_CONTROL_REQUEST_METHOD',
+        'HTTP_SEC_FETCH_MODE',
+        'HTTP_SEC_FETCH_DEST',
+        'HTTP_SEC_FETCH_SITE'
+    ]
 
     def __init__(self, params):
         self.params=params
@@ -57,22 +69,11 @@ class WSGIApp:
         self.debug = True #params.debugWeb
 
     def __call__(self, environ, start_response):
-        keys = [
-                'PATH_INFO',
-                'REQUEST_METHOD',
-                'HTTP_ORIGIN',
-                'HTTP_REFERER',
-                'HTTP_HOST',
-                'HTTP_ACCEPT',
-                'HTTP_ACCESS_CONTROL_REQUEST_METHOD',
-                'HTTP_SEC_FETCH_MODE',
-                'HTTP_SEC_FETCH_DEST',
-                'HTTP_SEC_FETCH_SITE'
-            ]
+
         try:
             self.headers.load(environ)
             if self.debug:
-                self._debug(keys,environ)
+                self._debug(WSGIApp.keys,environ)
 
             path = environ.get('PATH_INFO')
             origin = environ.get('HTTP_ORIGIN')
@@ -105,4 +106,5 @@ class WSGIApp:
         origin_port = URLManip(self.headers.header('Origin')).port
         wsgi_port = URLManip(self.headers.header('Host')).port
         syslog(LogLevel.INFO, f'STATIC {origin_port}, DYNAMIC {wsgi_port}')
+
 
