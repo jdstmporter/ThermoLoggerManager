@@ -50,7 +50,7 @@ class SafeFile:
 
 class Log:
 
-    def __init__(self, filename='syslog.log', loglevel = LogLevel.DEBUG, encoding='utf-8'):
+    def __init__(self, filename='/var/log/tempsensor/syslog.log', loglevel = LogLevel.DEBUG, encoding='utf-8'):
         self.file = SafeFile(filename)
         self.loglevel = loglevel
         self.encoding = encoding
