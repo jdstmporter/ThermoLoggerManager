@@ -7,12 +7,16 @@ class WSGIApplication:
         self._params = Params.load(config)
 
 
-    def __call__(self):
+    def __call__(self) -> WSGIApp:
         syslog(LogLevel.INFO, 'Starting server')
         return WSGIApp(self._params)
 
     @property
-    def parameters(self):
+    def parameters(self) -> Params:
         return self._params
 
+    @classmethod
+    def load(cls) -> WSGIApp:
+        wsgi = WSGIApplication('/etc/thermologger/config.json')
+        return wsgi()
 
