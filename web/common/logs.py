@@ -76,7 +76,7 @@ class Log:
             self(LogLevel.ERROR,f'Unknown log level {name}')
             self.exc(e)
         except Exception as e:
-            print(str(e))
+            print(str(e),file=sys.stderr)
             self.exc(e)
 
     @classmethod
@@ -107,9 +107,7 @@ class Log:
         self.loglevel=level
 
 
-logfile = 'syslog.log' if HostInfo.is_MAC else '/var/log/thermologger.log'
+logfile = 'syslog.log' if HostInfo.is_MAC else '/var/log/tempsensor/syslog.log'
 syslog = Log(logfile)
 
-if __name__ == '__main__':
-    print(LogLevel.__members__)
-    syslog.error('fred')
+

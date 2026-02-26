@@ -66,7 +66,7 @@ class WSGIApp:
         self.dynamic_port = params.web_port
         self.cors_permitted = set()
         self.headers = WSGIEnvironment()
-        self.debug = True #params.debugWeb
+        self.debug = params.debugWeb
 
     def __call__(self, environ, start_response):
 

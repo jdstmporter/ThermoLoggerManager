@@ -19,13 +19,13 @@ class Loadable:
     def load(cls, path):
         try:
             config=cls._full_path(path)
-            print(f'Config path is {config}')
+            syslog(LogLevel.INFO,f'Config path is {config}')
             with open(config, mode='r') as conf:
                 j = json.load(conf)
         except Exception as e:
             syslog(LogLevel.ERROR,f'Error: {e}')
             j = dict()
-        print('\n'.join([f'{key} = {value}' for key, value in j.items()]))
+        syslog(LogLevel.INFO,'\n'.join([f'{key} = {value}' for key, value in j.items()]))
         return cls(**j)
 
     def __init__(self,**kwargs):

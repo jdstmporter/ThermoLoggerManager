@@ -17,6 +17,8 @@ class CmdLineArgs:
 
         log_names = [x.name for x in LogLevel]
         parser.add_argument('--loglevel', '-L',dest='loglevel',choices=log_names,type=str,default='INFO',required=False)
+
+        parser.add_argument('--single','-s',dest='single',action='store_true', help='single-shot mode', default=False, required=False)
         try:
             opts = parser.parse_args(args)
             is_live = False
@@ -35,6 +37,11 @@ class CmdLineArgs:
             log_level = LogLevel.safe_named(opts.loglevel,LogLevel.INFO)
             syslog(LogLevel.INFO,f'Setting Log Level to {log_level.name}')
             self.log_level = log_level
+
+            self.single_shot = opts.single
+            if self.single_shot:
+                print('Specified single shot mode')
+
             return True
 
         except ArgumentError as e:

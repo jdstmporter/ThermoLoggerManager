@@ -11,8 +11,9 @@ from thermologger.common import Params, syslog, LogLevel
 
 class RunLoop:
 
-    def __init__(self,path):
+    def __init__(self,path,single_shot=False):
         self.params = Params.load(path)
+        self.single_shot = single_shot
         self.scheduler = sched.scheduler(time.time, time.sleep)
 
 
@@ -39,13 +40,15 @@ class RunLoop:
 
     def runner(self):
         self.action()
-        self.scheduler.enter(self.params.wait_time, 1, self.runner, ())
+        if not self.single_shot:
+            self.scheduler.enter(self.params.wait_time, 1, self.runner, ())
 
     def run(self):
         self.runner()
-        try:
-            self.scheduler.run()
-        except KeyboardInterrupt:
-            syslog(LogLevel.INFO,'Exiting')
+        if not self.single_shot:
+            try:
+                self.scheduler.run()
+            except KeyboardInterrupt:
+                syslog(LogLevel.INFO,'Exiting')
 
 

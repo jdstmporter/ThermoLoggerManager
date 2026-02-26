@@ -1,6 +1,7 @@
 from argparse import ArgumentParser, ArgumentError
 from .logs import LogLevel, syslog
 from .hostinfo import HostInfo
+import sys
 
 class CmdLineArgs:
 
@@ -22,10 +23,10 @@ class CmdLineArgs:
             is_live = False
             if opts.live:
                 is_live = True
-                print('Specified live mode')
+                syslog(LogLevel.DEBUG,'Specified live mode')
             elif opts.dev:
                 is_live = False
-                print('Specified dev mode')
+                syslog(LogLevel.DEBUG,'Specified dev mode')
             else:
                 is_live = HostInfo.is_Server
                 syslog(LogLevel.INFO,f'Computed mode: live={is_live}')
@@ -38,8 +39,8 @@ class CmdLineArgs:
             return True
 
         except ArgumentError as e:
-            print(f'Args are {args}')
-            print(f'Error in provided options: {e}')
-            parser.print_help()
+            print(f'Args are {args}',file=sys.stderr)
+            print(f'Error in provided options: {e}',file=sys.stderr)
+            parser.print_help(file=sys.stderr)
             return False
 

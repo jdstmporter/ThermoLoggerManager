@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+import sys
+
 from .common import Params, syslog, LogLevel, CmdLineArgs
 from .wsgi import WSGIApplication, SafeWSGIServer
 
@@ -25,5 +27,5 @@ def run(args):
             run_safe(config_live if parser.is_live else config_dev)
         return 0
     except Exception as e:
-        print(f'General error: {e}')
+        print(f'General error: {e}',file=sys.stderr)
 
