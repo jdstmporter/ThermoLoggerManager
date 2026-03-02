@@ -11,5 +11,6 @@
     "610400008c6c": "NEW 1",
     "880400008c6c": "NEW 2"
   },
+  "scheduler_size" : 2,
   "gc" : true
 }

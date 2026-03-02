@@ -1,10 +1,8 @@
 import gc
 
 from thermologger.api import ScanForUpdates
-from thermologger.common.schedule import SimpleScheduler
-from thermologger.db import SQLStore
+from .schedule import OneShotScheduler, Scheduler
 from thermologger.common import Params, syslog, LogLevel
-
 
 
 
@@ -16,25 +14,6 @@ class RunLoop:
 
 
 
-    def action(self):
-        scanner = ScanForUpdates(self.params)
-        beacons = scanner.run()
-
-        if syslog.isDebug:
-            syslog(LogLevel.DEBUG,f'Got {len(beacons)} records')
-            for beacon in beacons:
-                syslog(LogLevel.DEBUG,str(beacon))
-
-        if len(beacons) > 0:
-            records = [b.record() for b in beacons]
-            syslog(LogLevel.INFO,'Contacting SQL')
-            try:
-                things = SQLStore(self.params)
-                things.write(records)
-                syslog(LogLevel.INFO,'Uploaded')
-            except Exception as e:
-
-                syslog(LogLevel.ERROR,f'Error: {str(e)}')
     '''
     def runner(self):
         self.action()
@@ -42,12 +21,19 @@ class RunLoop:
             self.scheduler.enter(self.params.wait_time, 1, self.runner, ())
 '''
 
+    def _collected(self,generation=0):
+        try:
+            return gc.get_stats()[generation]['collected']
+        except:
+            return None
+
     def run(self):
         collect = self.params.gc
+        collected = self._collected(0)
         interval = self.params.wait_time
         max_iterations = self.params.scheduler_size
         if self.single_shot:
-            self.action()
+            OneShotScheduler(self.params).run()
         else:
             #if collect:
             #    gc.set_debug(gc.DEBUG_LEAK)
@@ -55,11 +41,14 @@ class RunLoop:
             while alive:
                 try:
                     print('*** starting new scheduler ***')
-                    scheduler = SimpleScheduler(self.action, interval=interval, max_iterations=max_iterations)
-                    alive=scheduler.run()
+                    alive=Scheduler(self.params).run()
                     if collect:
                         print('Garbage collecting')
                         gc.collect(0)
+                        new_collected=self._collected(0)
+                        if new_collected is not None and collected is not None:
+                            print(f'Garbage collected {new_collected-collected} objects')
+                            collected=new_collected
                 except KeyboardInterrupt:
                     alive=False
                 except Exception as e:
