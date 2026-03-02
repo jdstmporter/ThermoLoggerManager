@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from .runloop import RunLoop
+from .loop import RunLoop
 from .common import CmdLineArgs,syslog
 import gc
 

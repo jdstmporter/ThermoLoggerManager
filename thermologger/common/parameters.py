@@ -9,6 +9,7 @@ class Params(Loadable):
         d = dict(
             scan_time=60,
             wait_time=300,
+            scheduler_size=50,
             channel_ID = '2818594',
             url='https://api.thingspeak.com/channels/{channel_ID}/bulk_update.json',
             READ_KEY='8V5Q5QO2CO01B0BQ',
@@ -22,7 +23,8 @@ class Params(Loadable):
             db_port=3306,
             web_ip='0.0.0.0',
             web_port=8080,
-            debugWeb=False
+            debugWeb=False,
+            gc=False
         )
         d.update(kwargs)
         super().__init__(**d)
