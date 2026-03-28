@@ -1,5 +1,3 @@
-import multiprocessing
-import sched
 import time
 from .action import Action
 

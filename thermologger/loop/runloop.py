@@ -1,6 +1,5 @@
 import gc
 
-from thermologger.api import ScanForUpdates
 from .schedule import OneShotScheduler, Scheduler
 from thermologger.common import Params, syslog, LogLevel
 
@@ -11,15 +10,6 @@ class RunLoop:
     def __init__(self,path,single_shot=False):
         self.params = Params.load(path)
         self.single_shot = single_shot
-
-
-
-    '''
-    def runner(self):
-        self.action()
-        if not self.single_shot:
-            self.scheduler.enter(self.params.wait_time, 1, self.runner, ())
-'''
 
     def _collected(self,generation=0):
         try:

@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 from .loop import RunLoop
-from .common import CmdLineArgs,syslog
-import gc
+from .common import CmdLineArgs
 
 config_live='/etc/thermologger/config.json'
 config_dev='config/config.json'

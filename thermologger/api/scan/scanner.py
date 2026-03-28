@@ -4,12 +4,13 @@ import asyncio
 from ..data import AdvertisingResponse, ThermoBeaconValues
 
 class ScanForUpdates:
+
     def __init__(self, params):
         self.timeout = params.scan_time
         self.response_length = params.response_length
         self.name = params.name
         self.macs = []
-        self.beacons = []
+        self.beacons : list[ThermoBeaconValues] = []
 
     def check(self, response):
         if response.name_is(self.name) :
@@ -39,7 +40,7 @@ class ScanForUpdates:
         await asyncio.sleep(self.timeout)
         await scanner.stop()
 
-    def run(self) -> [ThermoBeaconValues] :
+    def run(self) -> list[ThermoBeaconValues] :
         loop = asyncio.get_event_loop()
         try:
             loop.run_until_complete(self())

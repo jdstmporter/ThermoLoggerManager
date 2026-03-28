@@ -1,8 +1,27 @@
+import math
+
 import mysql.connector
 
 from thermologger.common import LogLevel, syslog
 from thermologger.common.records import Record
 from datetime import datetime
+
+class TimeInterval:
+    def __init__(self,start = 0,end = 0xffffffff):
+        if start<end:
+            self.start=start
+            self.end=end
+        else:
+            self.start = start
+            self.end = start
+
+    def intersect(self,other):
+        start = max(self.start, other.start)
+        end = min(self.end, other.end)
+        return TimeInterval(start,end)
+
+    def __call__(self):
+        return (self.start,self.end)
 
 
 class SQLStore:
@@ -19,54 +38,54 @@ class SQLStore:
 
     def check(self):
         if not self.db.is_connected():
-            syslog(LogLevel.INFO,'MySQL connection stale; attempting to reconnect');
+            syslog(LogLevel.INFO,'MySQL connection stale; attempting to reconnect')
             self.db.reconnect()
+
 
     def _query(self,sql) -> list[tuple]:
         self.check()
         cursor = self.db.cursor()
         cursor.execute(sql)
-        out = [x for x in cursor]
+        out = cursor.fetchall()
         cursor.close()
         return out
+
 
     def time_range(self):
-        out = self._query('select max(timestamp), min(timestamp) from records')
+        out = self._query('select min(timestamp), max(timestamp) from records')
         if len(out)>0:
-            return out[0]
+            return TimeInterval(*out[0])
         else:
-            return (datetime.now().timestamp(),0)
+            return TimeInterval(end=int(datetime.now().timestamp()))
 
 
-    def read(self) -> [Record]:
-        self.check()
-        cursor = self.db.cursor()
-        query = 'SELECT mac, sensor, timestamp, temperature, humidity, battery FROM records ORDER BY seq'
-        cursor.execute(query)
+    def read(self,range=None) -> list[Record]:
+        if range is None:
+            q='SELECT mac, sensor, timestamp, temperature, humidity, battery FROM records ORDER BY seq'
+        else:
+            q=f'SELECT mac, sensor, timestamp, temperature, humidity, battery FROM records WHERE timestamp>{range.start} AND timestamp<{range.end} ORDER BY seq'
+
+        rows = self._query(q)
         out = []
-        for (mac, sensor, timestamp, temperature, humidity, battery) in cursor:
+        for (mac, sensor, timestamp, temperature, humidity, battery) in rows:
             out.append(Record(mac, sensor, temperature, humidity, battery, timestamp))
-        cursor.close()
         return out
+
+
 
     def beacons(self) -> dict:
         try:
-            self.check()
-            cursor = self.db.cursor()
-            query = 'SELECT mac, name from sensors'
-            cursor.execute(query)
-            out = {mac: name for (mac, name) in cursor}
-            cursor.close()
-        except:
+            rows = self._query('SELECT mac, name from sensors')
+            out = {mac: name for (mac, name) in rows}
+        except Exception as e:
+            syslog(LogLevel.ERROR,f'Error loading beacons list: {e}')
             out = {}
 
         return out
 
     def _get_pks(self) -> set :
-        cursor = self.db.cursor()
-        cursor.execute('select seq FROM records')
-        seqs = { x[0] for x in cursor }
-        cursor.close()
+        out = self._query('select seq FROM records')
+        seqs = { x[0] for x in out }
         return seqs
 
     def next_pk(self):
@@ -76,7 +95,7 @@ class SQLStore:
         return record[0]+1
 
 
-    def write(self,records : [Record]):
+    def write(self,records : list[Record]):
         beacons = self.beacons()
         vals = ', '.join([r.sql(beacons) for r in records])
         sql = f"INSERT INTO records (mac, sensor, timestamp, temperature, humidity, battery) values {vals}"
