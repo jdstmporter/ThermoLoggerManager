@@ -1,2 +1,4 @@
-from .metOffice import runMet
-from .meteoSource import runMeteoSource
+from .metOffice import MetOfficeProvider
+from .meteoSource import MeteoSourceProvider
+
+from .runner import run

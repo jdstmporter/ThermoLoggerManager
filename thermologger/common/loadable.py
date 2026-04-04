@@ -31,3 +31,35 @@ class Loadable:
     def __init__(self,**kwargs):
         self.dict=kwargs
 
+class KeyedDict(Loadable):
+
+    def __init__(self,**kwargs):
+        super().__init__(**kwargs)
+
+    def __getitem__(self, key):
+        value = self.dict[str(key)]
+        if type(value) == dict:
+            return KeyedDict(**value)
+        elif type(value) == list:
+            d={ str(i) : value[i] for i in range(len(value)) }
+            return KeyedDict(**d)
+        else:
+            return value
+
+    def __getattr__(self, key):
+        return self.__getitem__(key)
+
+    def __len__(self):
+        return len(self.dict)
+
+    def __contains__(self, key):
+        return key in self.dict
+
+    def keys(self):
+        return self.dict.keys()
+
+    def items(self):
+        return self.dict.items()
+
+    def __iter__(self):
+        return iter(self.dict)

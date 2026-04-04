@@ -1,37 +1,24 @@
 import math
 
 import mysql.connector
-
 from thermologger.common import LogLevel, syslog
 from thermologger.common.records import Record
 from datetime import datetime
-
-class TimeInterval:
-    def __init__(self,start = 0,end = 0xffffffff):
-        if start<end:
-            self.start=start
-            self.end=end
-        else:
-            self.start = start
-            self.end = start
-
-    def intersect(self,other):
-        start = max(self.start, other.start)
-        end = min(self.end, other.end)
-        return TimeInterval(start,end)
-
-    def __call__(self):
-        return (self.start,self.end)
 
 
 class SQLStore:
 
     def __init__(self,params):
         print(f'Connecting to mysql')
-        print(f'DB = {params.db_database} HOST = {params.db_host} USER = {params.db_user} PASSWORD = {params.db_password} PORT = {params.db_port}')
-        self.db = mysql.connector.connect(database=params.db_database,host=params.db_host,
-                                          user=params.db_user,password=params.db_password,
-                                          port=params.db_port)
+        database = params.db_database
+        host = params.db_host
+        user = params.db_user
+        password = params.db_password
+        port = params.db_port
+        print(f'DB = {database} HOST = {host} USER = {user} PASSWORD = {password} PORT = {port}')
+        self.db = mysql.connector.connect(database=database,host=host,
+                                          user=user,password=password,
+                                          port=port)
 
     def close(self):
         self.db.close()
@@ -49,6 +36,13 @@ class SQLStore:
         out = cursor.fetchall()
         cursor.close()
         return out
+
+    def _write(self,sql):
+        self.check()
+        cursor = self.db.cursor()
+        cursor.execute(sql)
+        self.db.commit()
+        cursor.close()
 
 
     def time_range(self):
@@ -105,6 +99,10 @@ class SQLStore:
         cursor.execute(sql)
         self.db.commit()
         cursor.close()
+
+
+
+
 
 
 

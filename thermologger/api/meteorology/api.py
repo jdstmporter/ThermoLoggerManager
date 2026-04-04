@@ -1,5 +1,7 @@
 import requests
 from datetime import datetime
+from thermologger.common import KeyedDict
+
 
 class GeographicLocation:
 
@@ -21,36 +23,14 @@ class GeographicLocation:
     def __str__(self):
         return f'{self.latitudeNS}, {self.longitudeEW}'
 
-class JSONObject:
-    def __init__(self,data):
-        self.json=data
 
-    def _valueFrom(self,value):
-        if type(value) in [list, dict]:
-            return JSONObject(value)
-        else:
-            return value
-
-    def __len__(self):
-        return len(self.json)
-
-    def __getitem__(self,idx):
-        #print(f'Index {idx}')
-        if type(self.json)==list:
-            return self._valueFrom(self.json[idx])
-        else:
-            raise Exception(f'JSON: not a list')
-
-    def __getattr__(self,key : str):
-        #print(f'Key {key}')
-        if type(self.json)==dict:
-            return self._valueFrom(self.json[key])
-        else:
-            raise Exception(f'JSON: not a dictionary')
 
 class MeteorologyDatum:
     def __init__(self,time,temperature,humidity):
-        self.timestamp = datetime.fromisoformat(time).timestamp()
+        if type(time)==str:
+            self.timestamp = datetime.fromisoformat(time).timestamp()
+        else:
+            self.timestamp = time
         self.temperature = temperature
         self.humidity = humidity
 
@@ -64,12 +44,15 @@ class MeteorologyDatum:
             items.append(f'{self.humidity}%')
         return ' '.join(items)
 
+    def sql(self):
+        return f"('{int(self.timestamp)}', {self.temperature}, {self.humidity})"
+
     def dict(self):
         return dict(timestamp=self.timestamp,temperature=self.temperature,humidity=self.humidity)
 
 class BaseMeteorologyData:
     def __init__(self,dat : dict):
-        self.json=JSONObject(dat)
+        self.json=KeyedDict(**dat)
         self.items=[]
 
     def __len__(self):
@@ -83,12 +66,30 @@ class BaseMeteorologyData:
 
 
 class BaseMeteorologyProvider:
+    _registry = dict()
 
-    def __init__(self,centre: GeographicLocation):
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        BaseMeteorologyProvider._registry[cls.__name__]=cls
+
+    @classmethod
+    def Load(cls,name):
+        try:
+            return cls._registry[name]
+        except Exception as e:
+            raise Exception(f'Cannot load {name} : error {e}')
+
+    @classmethod
+    def dataStructure(cls,json_data):
+        return json_data
+
+    def __init__(self,centre: GeographicLocation,path: str,apikey: str):
         self.centre=centre
+        self.url = path
+        self.apikey = apikey
 
-    def url(self):
-        return ''
+
+
 
     def attributes(self):
         return dict()
@@ -97,9 +98,10 @@ class BaseMeteorologyProvider:
         return dict()
 
     def __call__(self):
-        response = requests.request('GET', self.url(), params=self.attributes(), headers=self.headers())
+        response = requests.request('GET', self.url, params=self.attributes(), headers=self.headers())
         response.raise_for_status()
-        return response.json()
+        json.dumps(response.json(),indent=2)
+        return self.__class__.dataStructure(response.json())
 
 
 

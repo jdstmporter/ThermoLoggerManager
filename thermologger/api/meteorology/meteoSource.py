@@ -17,11 +17,9 @@ class MeteoSourceData(BaseMeteorologyData):
 
 class MeteoSourceProvider(BaseMeteorologyProvider):
 
-    def __init__(self, centre: GeographicLocation):
-        super().__init__(centre)
+    def __init__(self, centre: GeographicLocation, path: str, apikey: str):
+        super().__init__(centre,path,apikey)
 
-    def url(self):
-        return 'https://www.meteosource.com/api/v1/free/point'
 
     def attributes(self):
         return dict(
@@ -35,7 +33,7 @@ class MeteoSourceProvider(BaseMeteorologyProvider):
 
     def headers(self):
         return {
-            'X-API-Key' : '7s98p82l8fvqiaj7ct4nkbq7zpj2565iikzr5qht',
+            'X-API-Key' : self.apikey,
             'accept' : 'application/json'
         }
 

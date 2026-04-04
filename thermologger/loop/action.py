@@ -1,13 +1,14 @@
 
 from thermologger.api import ScanForUpdates
-from thermologger.db import SQLStore
+from .mysql_records import SensorSQLStore
 from thermologger.common import syslog, LogLevel
+
 
 class Action:
 
     def __init__(self,params):
         self.scanner = ScanForUpdates(params)
-        self.things = SQLStore(params)
+        self.db = SensorSQLStore(params)
 
     def __call__(self):
         beacons = self.scanner.run()
@@ -21,7 +22,7 @@ class Action:
             records = [b.record() for b in beacons]
             syslog(LogLevel.INFO, 'Contacting SQL')
             try:
-                self.things.write(records)
+                self.db.write_records(records)
                 syslog(LogLevel.INFO, 'Uploaded')
             except Exception as e:
                 syslog(LogLevel.ERROR, f'Error: {str(e)}')

@@ -1,8 +1,5 @@
-import gc
-
 from .schedule import OneShotScheduler, Scheduler
-from thermologger.common import Params, syslog, LogLevel
-
+from thermologger.common import Params, syslog, LogLevel, GarbageCollect
 
 
 class RunLoop:
@@ -11,15 +8,9 @@ class RunLoop:
         self.params = Params.load(path)
         self.single_shot = single_shot
 
-    def _collected(self,generation=0):
-        try:
-            return gc.get_stats()[generation]['collected']
-        except:
-            return None
-
     def run(self):
         collect = self.params.gc
-        collected = self._collected(0)
+        gc=GarbageCollect()
         interval = self.params.wait_time
         max_iterations = self.params.scheduler_size
         if self.single_shot:
@@ -33,12 +24,7 @@ class RunLoop:
                     print('*** starting new scheduler ***')
                     alive=Scheduler(self.params).run()
                     if collect:
-                        print('Garbage collecting')
-                        gc.collect(0)
-                        new_collected=self._collected(0)
-                        if new_collected is not None and collected is not None:
-                            print(f'Garbage collected {new_collected-collected} objects')
-                            collected=new_collected
+                        self.gc()
                 except KeyboardInterrupt:
                     alive=False
                 except Exception as e:
