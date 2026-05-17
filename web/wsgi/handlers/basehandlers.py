@@ -18,11 +18,10 @@ class URLManip:
 class BaseHandler:
     def __init__(self,uri,**kwargs):
         self.uri=uri
-        self.cors=kwargs.get('cors',False)
-        self.origin=kwargs.get('origin',None)
         self.headers = []
-        self.contentType='application/json'
-        self.routes=kwargs.get('routes',[])
+        self.contentType = 'application/json'
+        self.origin = kwargs.get('origin', None)
+        self.cors=kwargs.get('cors',False)
 
     def _response(self,status=HTTPStatus.OK,data=''):
         return ResponseObject(status=status, contentType=self.contentType,

@@ -2,14 +2,14 @@ from collections import defaultdict
 from http import HTTPMethod
 
 from .basehandlers import BaseHandler
-from .methodhandlers import OPTIONSHandler, HEADERHandler, MissingMethodHandler
+from .methodhandlers import OPTIONSHandler, HEADERHandler
 
 
 class HandlerContainer:
 
     def __init__(self,**kwargs):
         self._methods = HTTPMethod.__members__.values()
-        self._handlers = defaultdict(lambda : MissingMethodHandler)
+        self._handlers = defaultdict(lambda : BaseHandler)
         for key, value in kwargs.items():
             if key.upper() in self._methods:
                 self._handlers[key.upper()] = value
@@ -29,7 +29,7 @@ class HandlerContainer:
         elif type(item) == HTTPMethod:
             return self._handlers[item.value]
         else:
-            return MissingMethodHandler
+            return BaseHandler
 
     def __setitem__(self, key, value):
         try:

@@ -48,21 +48,13 @@ class WSGIApp:
                 self._debug(WSGIApp.keys,environ)
 
             path = environ.get('PATH_INFO')
-            origin = environ.get('HTTP_ORIGIN')
             method = environ.get('REQUEST_METHOD')
+            cors = environ.get('HTTP_SEC_FETCH_MODE') is not None
+            origin = environ.get('HTTP_ORIGIN')
             if origin is None:
                 origin = environ.get('HTTP_REFERER')
-            if method == 'GET':
-                cors = environ.get('HTTP_SEC_FETCH_MODE') is not None
-                responder = self.handlers['GET'](path,origin=origin,cors=cors,sql=self.sql)()
-            elif method == 'HEAD':
-                cors = environ.get('HTTP_SEC_FETCH_MODE') is not None
-                responder = self.handlers['HEAD'](path, origin=origin, cors=cors)()
-            elif method == 'OPTIONS':
-                requested_method=environ.get('HTTP_ACCESS_CONTROL_REQUEST_METHOD')
-                responder = self.handlers['OPTIONS'](path,origin=origin,method=requested_method)()
-            else:
-                responder = ResponseObject(status=HTTPStatus.NOT_IMPLEMENTED)
+            requested_method = environ.get('HTTP_ACCESS_CONTROL_REQUEST_METHOD')
+            responder=self.handlers[method](path,origin=origin,cors=cors,method=requested_method,sql=self.sql)()
         except Exception as e:
             syslog(LogLevel.CRITICAL,f'Error {type(e).__name__}: {e}')
             responder = ResponseObject(status=HTTPStatus.INTERNAL_SERVER_ERROR)

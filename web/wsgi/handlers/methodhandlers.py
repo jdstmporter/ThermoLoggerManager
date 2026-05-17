@@ -4,11 +4,11 @@ from http import HTTPStatus
 from urllib.parse import urlparse
 
 class HEADERHandler(BaseHandler):
-    def __init__(self,uri,origin=None,cors=False):
-        super().__init__(uri,origin=origin,cors=cors)
+    def __init__(self,uri,**kwargs):
+        super().__init__(uri,**kwargs)
         self.parsed=urlparse(self.uri)
         if self.cors:
-            self.headers.append(('Access-Control-Allow-Origin',origin))
+            self.headers.append(('Access-Control-Allow-Origin',self.origin))
 
     def __call__(self):
         return self._response(data='')
@@ -17,6 +17,10 @@ class HEADERHandler(BaseHandler):
        return ''
 
 class GETHandler(HEADERHandler):
+    def __init__(self,uri,**kwargs):
+        super().__init__(uri,**kwargs)
+        self.routes = kwargs.get('routes', [])
+        self.sql=kwargs.get('sql',None)
 
     def __call__(self):
         try:
@@ -35,9 +39,9 @@ class GETHandler(HEADERHandler):
 
 
 class OPTIONSHandler(BaseHandler):
-    def __init__(self,uri,origin=None, method = 'GET'):
-        super().__init__(uri,origin=origin)
-        self.method=method
+    def __init__(self,uri,**kwargs):
+        super().__init__(uri,**kwargs)
+        self.method=kwargs.get('method','GET')
         #self.cors_permitted = set()
 
     def __call__(self):
@@ -55,7 +59,3 @@ class OPTIONSHandler(BaseHandler):
         else:
             return self._error(status=HTTPStatus.FORBIDDEN)
 
-class MissingMethodHandler(BaseHandler):
-
-    def __call__(self):
-        return self._error(status=HTTPStatus.METHOD_NOT_ALLOWED)
