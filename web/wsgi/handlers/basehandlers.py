@@ -16,13 +16,13 @@ class URLManip:
             self.path = None
 
 class BaseHandler:
-    def __init__(self,uri,cors=False,origin=None,routes=[]):
+    def __init__(self,uri,**kwargs):
         self.uri=uri
-        self.cors=cors
-        self.origin=origin
+        self.cors=kwargs.get('cors',False)
+        self.origin=kwargs.get('origin',None)
         self.headers = []
         self.contentType='application/json'
-        self.routes=routes
+        self.routes=kwargs.get('routes',[])
 
     def _response(self,status=HTTPStatus.OK,data=''):
         return ResponseObject(status=status, contentType=self.contentType,

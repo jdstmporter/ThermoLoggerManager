@@ -2,13 +2,11 @@ from .meteorologyAction import MeteorologyAction
 
 from thermologger.common import Params, syslog, LogLevel, GarbageCollect
 
-
 class MeteorologyRunLoop:
 
     def __init__(self,path,single_shot=False):
         self.params = Params.load(path)
         self.single_shot = single_shot
-
         print(str(self.params))
 
 
@@ -20,19 +18,15 @@ class MeteorologyRunLoop:
 
     def run(self):
         if self.single_shot:
-            self._action()
+            self.runner()
         else:
             alive = True
+            interval = self.params.meteo.interval
             gc = GarbageCollect()
-            max_iterations = self.params.scheduler_size
             while alive:
                 try:
-                    iterations=0
-                    while iterations<self.max_iterations:
-                        self.runner()
-                        time.sleep(3600)
-                        iterations+=1
-                    print('*** starting new meteoscheduler ***')
+                    self.runner()
+                    time.sleep(interval)
                     if collect:
                         gc()
                 except KeyboardInterrupt:
@@ -45,9 +39,3 @@ class MeteorologyRunLoop:
 
 
 
-def run(path):
-    try:
-        m=MeteorologyRunLoop(path,True)
-        m.run()
-    except Exception as e:
-        print(str(e))

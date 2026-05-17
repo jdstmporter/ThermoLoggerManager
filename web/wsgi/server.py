@@ -1,7 +1,8 @@
+from .handlers.methodhandlers import HEADERHandler
 from .protocol import WSGIEnvironment, ResponseObject
-from .handlers import OPTIONSHandler, GETHandler, URLManip
+from .handlers import OPTIONSHandler, GETHandler, URLManip, HandlerContainer
 from datetime import datetime
-from http import HTTPStatus
+from http import HTTPStatus, HTTPMethod
 from urllib.parse import parse_qs
 import json
 from web.common import syslog, LogLevel
@@ -13,39 +14,9 @@ def asDate(lst,default=datetime.min):
     except:
         return default
 
-class TempGETHandler(GETHandler):
-
-    def __init__(self,path,sql,origin=None,cors=False):
-        super().__init__(path,cors=cors,origin=origin,routes=['data','schema','beacons','range'])
-        self.sql=sql
-
-
-    def data(self):
-        try:
-            args = parse_qs(self.parsed.query)
-            start = asDate(args.get('s', []), default=datetime.min)
-            end = asDate(args.get('e', []), default=datetime.max)
-        except:
-            start = datetime.min
-            end = datetime.max
-
-        records = self.sql.read()
-        obj = [r.dict() for r in records]
-        return json.dumps(obj)
-
-    def beacons(self):
-        beacons = self.sql.beacons()
-        return json.dumps(beacons)
-
-    def range(self):
-        (ma, mi) = self.sql.time_range()
-        return json.dumps({'start': mi, 'end': ma})
-
-
 
 class WSGIApp:
 
-    handlers = dict(GET=TempGETHandler)
     keys = [
         'PATH_INFO',
         'REQUEST_METHOD',
@@ -59,7 +30,7 @@ class WSGIApp:
         'HTTP_SEC_FETCH_SITE'
     ]
 
-    def __init__(self, params):
+    def __init__(self, params, handlers = HandlerContainer.Load()):
         self.params=params
         self.sql = SQLStore(self.params)
         self.origin_Port = params.static_port
@@ -67,6 +38,7 @@ class WSGIApp:
         self.cors_permitted = set()
         self.headers = WSGIEnvironment()
         self.debug = params.debugWeb
+        self.handlers = handlers
 
     def __call__(self, environ, start_response):
 
@@ -83,9 +55,12 @@ class WSGIApp:
             if method == 'GET':
                 cors = environ.get('HTTP_SEC_FETCH_MODE') is not None
                 responder = self.handlers['GET'](path,origin=origin,cors=cors,sql=self.sql)()
+            elif method == 'HEAD':
+                cors = environ.get('HTTP_SEC_FETCH_MODE') is not None
+                responder = self.handlers['HEAD'](path, origin=origin, cors=cors)()
             elif method == 'OPTIONS':
                 requested_method=environ.get('HTTP_ACCESS_CONTROL_REQUEST_METHOD')
-                responder = OPTIONSHandler(path,method=requested_method,origin=origin)()
+                responder = self.handlers['OPTIONS'](path,origin=origin,method=requested_method)()
             else:
                 responder = ResponseObject(status=HTTPStatus.NOT_IMPLEMENTED)
         except Exception as e:

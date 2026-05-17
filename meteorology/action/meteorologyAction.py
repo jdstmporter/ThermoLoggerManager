@@ -1,4 +1,5 @@
-from .api import GeographicLocation, BaseMeteorologyProvider
+from .api import GeographicLocation
+from .providers import BaseMeteorologyProvider
 from .mysql_meteorology import MeteorologySQLStore
 from thermologger.common import LogLevel, syslog
 

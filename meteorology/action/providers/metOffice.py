@@ -1,4 +1,4 @@
-from .api import BaseMeteorologyProvider, GeographicLocation, BaseMeteorologyData, MeteorologyDatum
+from meteorology.action.api import BaseMeteorologyProvider, GeographicLocation, BaseMeteorologyData, MeteorologyDatum
 
 class MetOfficeData(BaseMeteorologyData):
     def __init__(self,dat : dict):

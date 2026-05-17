@@ -24,7 +24,7 @@ class RunLoop:
                     print('*** starting new scheduler ***')
                     alive=Scheduler(self.params).run()
                     if collect:
-                        self.gc()
+                        gc()
                 except KeyboardInterrupt:
                     alive=False
                 except Exception as e:

@@ -4,8 +4,8 @@ from http import HTTPStatus
 from urllib.parse import urlparse
 
 class HEADERHandler(BaseHandler):
-    def __init__(self,uri,cors=False,origin=None,routes=[]):
-        super().__init__(uri,cors=cors,origin=origin,routes=routes)
+    def __init__(self,uri,origin=None,cors=False):
+        super().__init__(uri,origin=origin,cors=cors)
         self.parsed=urlparse(self.uri)
         if self.cors:
             self.headers.append(('Access-Control-Allow-Origin',origin))
@@ -35,7 +35,7 @@ class GETHandler(HEADERHandler):
 
 
 class OPTIONSHandler(BaseHandler):
-    def __init__(self,uri,method='GET',origin=None):
+    def __init__(self,uri,origin=None, method = 'GET'):
         super().__init__(uri,origin=origin)
         self.method=method
         #self.cors_permitted = set()
@@ -54,3 +54,8 @@ class OPTIONSHandler(BaseHandler):
             return self._response(status=HTTPStatus.NO_CONTENT)
         else:
             return self._error(status=HTTPStatus.FORBIDDEN)
+
+class MissingMethodHandler(BaseHandler):
+
+    def __call__(self):
+        return self._error(status=HTTPStatus.METHOD_NOT_ALLOWED)

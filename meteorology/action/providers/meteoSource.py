@@ -1,4 +1,4 @@
-from .api import BaseMeteorologyProvider, BaseMeteorologyData, GeographicLocation, MeteorologyDatum
+from meteorology.action.api import BaseMeteorologyProvider, BaseMeteorologyData, GeographicLocation, MeteorologyDatum
 
 
 class MeteoSourceData(BaseMeteorologyData):

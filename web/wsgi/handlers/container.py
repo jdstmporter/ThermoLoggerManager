@@ -2,34 +2,43 @@ from collections import defaultdict
 from http import HTTPMethod
 
 from .basehandlers import BaseHandler
-from .methodhandlers import OPTIONSHandler, HEADERHandler
+from .methodhandlers import OPTIONSHandler, HEADERHandler, MissingMethodHandler
 
 
 class HandlerContainer:
 
-    def __init__(self):
-        self._handlers = defaultdict(lambda : BaseHandler)
+    def __init__(self,**kwargs):
         self._methods = HTTPMethod.__members__.values()
+        self._handlers = defaultdict(lambda : MissingMethodHandler)
+        for key, value in kwargs.items():
+            if key.upper() in self._methods:
+                self._handlers[key.upper()] = value
+
 
     def _getMethod(self,value):
         if type(value) == str:
-            return HTTPMethod.__members__.get(value.upper(),HTTPMethod.HEAD)
+            return value.upper()
         elif type(value) == HTTPMethod:
-            return value
+            return value.value
         else:
             return HTTPMethod.HEAD
 
-    def __getitem__(self, item : str|HTTPMethod):
-        return self._handlers[self._getMethod(item)]
+    def __getitem__(self, item):
+        if type(item) == str:
+            return self._handlers[item]
+        elif type(item) == HTTPMethod:
+            return self._handlers[item.value]
+        else:
+            return MissingMethodHandler
 
     def __setitem__(self, key, value):
         try:
-            self._handlers[self._getMethod(key)]=value
+            if type(key) == str and key.upper() in self._methods:
+                self._handlers[key.upper()] = value
+            elif type(key) == HTTPMethod:
+                self._handlers[key.value] = value
         except:
             pass
-
-    def __getattr__(self,item):
-        return self[item]
 
     def extend(self,**kwargs):
         for k,v in kwargs:
@@ -37,7 +46,10 @@ class HandlerContainer:
 
     @classmethod
     def Load(cls,**kwargs):
-        the = HandlerContainer()
-        the[HTTPMethod.OPTIONS] = OPTIONSHandler
-        the[HTTPMethod.HEAD] = HEADERHandler
+        args = dict(
+            OPTIONS = OPTIONSHandler,
+            HEAD = HEADERHandler
+        )
+        args.update(kwargs)
+        the = HandlerContainer(**args)
 
