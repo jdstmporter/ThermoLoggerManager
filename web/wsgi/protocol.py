@@ -51,6 +51,37 @@ class WSGIHeaders:
             out.extend([(k,v) for v in self[k]])
         return out
 
+class WSGIAuthentication:
+    def __init__(self,value : str):
+        self.raw=value
+        matcher = re.match('^([A-Za-z]+)(\\s+\\S+)*',value)
+        if matcher is None:
+            self.scheme = None
+            self.args = None
+        else:
+            self.scheme = matcher[1]
+            self.args = matcher[2].strip()
+
+    @property
+    def parts(self):
+        if self.args is None:
+            return []
+        else:
+            return [x.strip() for x in self.args.split(',')]
+
+    @property
+    def tokens(self):
+        return [p for p in self.parts if '=' not in p]
+
+    @property
+    def arguments(self):
+        d={}
+        for part in self.parts:
+            if '=' in part:
+                k, v = [p.strip() for p in part.split('=')]
+                d[k]=v
+        return d
+
 
 
 class WSGIEnvironment:
@@ -79,4 +110,6 @@ class WSGIEnvironment:
 
     def method(self):
         return self.environ.get('REQUEST_METHOD')
+
+
 

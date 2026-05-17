@@ -18,7 +18,7 @@ class SQLStore:
 
     def check(self):
         if not self.db.is_connected():
-            syslog(LogLevel.INFO,'MySQL connection stale; attempting to reconnect');
+            syslog(LogLevel.INFO,'MySQL connection stale; attempting to reconnect')
             self.db.reconnect()
 
     def _query(self,sql) -> list[tuple]:
@@ -37,7 +37,7 @@ class SQLStore:
             return (datetime.now().timestamp(),0)
 
 
-    def read(self) -> [Record]:
+    def read(self) -> list[Record]:
         self.check()
         cursor = self.db.cursor()
         query = 'SELECT mac, sensor, timestamp, temperature, humidity, battery FROM records ORDER BY seq'
